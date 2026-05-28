@@ -6,10 +6,14 @@ const app = express()
 
 const server = http.createServer(app)
 
+const allowedOrigins = (process.env.CLIENT_URLS || 'http://localhost:5173')
+  .split(',')
+  .map((s) => s.trim())
+
 const io = new Server(server, {
     cors: {
-        origin:'http://localhost:5173',
-        methods:['GET','POST'],
+        origin: allowedOrigins,
+        methods: ['GET', 'POST'],
     }
 })
 
