@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "cd ./client && npm run build",
-  "installCommand": "cd ./client && npm ci",
+  "root": "client",
   "framework": "vite",
-  "outputDirectory": "client/dist"
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": "dist"
 }
 
