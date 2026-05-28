@@ -2,7 +2,8 @@
   "version": 2,
   "framework": "vite",
   "buildCommand": "npm --prefix client run build",
-  "installCommand": "npm --prefix client install",
+  "installCommand": "npm install --prefix client",
+
   "outputDirectory": "client/dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
