@@ -26,9 +26,9 @@ export default function AuthForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API || 'http://localhost:3004';
       const res = await axios.post(
-        `${api}/api/user/login`,
+        `${api.replace(/\/$/, '')}/api/user/login`,
         input,
         {
           headers: {
