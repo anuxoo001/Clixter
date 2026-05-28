@@ -1,12 +1,11 @@
 {
-  "name": "clixter-monorepo",
+  "name": "clixter-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "install": "npm --prefix client install",
-    "build": "npm --prefix client run build",
-    "dev": "npm --prefix client run dev"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   }
 }
-
