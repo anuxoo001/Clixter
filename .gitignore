@@ -4,3 +4,4 @@ client/dist
 client/node_modules/
 server/node_modules/
 .vercel
+server/.env
