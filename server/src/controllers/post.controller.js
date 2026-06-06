@@ -205,6 +205,63 @@ export const getCommentOfPost = async (req, res) => {
     }
 }
 
+export const editCommentOnPost = async (req, res) => {
+    try {
+        const userId = req.id;
+        const { postId, commentId } = req.params;
+        const { commentText } = req.body;
+
+        if (!commentText) {
+            return res.status(400).json({ success: false, message: 'Please type comment!' });
+        }
+
+        const comment = await Comment.findById(commentId);
+        if (!comment) return res.status(404).json({ success: false, message: 'Comment not found!' });
+
+        if (comment.post.toString() !== postId) {
+            return res.status(404).json({ success: false, message: 'Post not found for this comment!' });
+        }
+
+        if (comment.author.toString() !== userId) {
+            return res.status(403).json({ success: false, message: 'Unauthorized!' });
+        }
+
+        comment.text = commentText;
+        await comment.save();
+
+        await comment.populate({ path: 'author', select: 'userName profilePicture' });
+
+        return res.status(200).json({ success: true, message: 'Comment updated successfully.', comment });
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+export const deleteCommentOnPost = async (req, res) => {
+    try {
+        const userId = req.id;
+        const { postId, commentId } = req.params;
+
+        const comment = await Comment.findById(commentId);
+        if (!comment) return res.status(404).json({ success: false, message: 'Comment not found!' });
+
+        if (comment.post.toString() !== postId) {
+            return res.status(404).json({ success: false, message: 'Post not found for this comment!' });
+        }
+
+        if (comment.author.toString() !== userId) {
+            return res.status(403).json({ success: false, message: 'Unauthorized!' });
+        }
+
+        await Comment.findByIdAndDelete(commentId);
+        await Post.updateOne({ _id: postId }, { $pull: { comments: commentId } });
+
+        return res.status(200).json({ success: true, message: 'Comment deleted successfully.', commentId });
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
+    }
+}
+
 export const bookmarkToPost = async (req, res) => {
     try {
         const authorId = req.id;
@@ -231,3 +288,4 @@ export const bookmarkToPost = async (req, res) => {
         return res.status(400).json({ success: false, message: error.message });
     }
 }
+

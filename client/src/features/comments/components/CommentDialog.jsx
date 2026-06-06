@@ -2,23 +2,26 @@ import { useState , useEffect } from 'react';
 import { Dialog, Button } from '@mui/material';
 import defaultLogo from "../../../assets/images/defaultlogo.png";
 import {
-
   IconButton,
 } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setPosts, setSelectedPost } from '../../posts/postSlice';
+import { setPosts } from '../../posts/postSlice';
 import { toast } from 'sonner';
+
 
 
 export default function CommentDialog({open , handleClose }) {
     const dispatch = useDispatch()
+    const navigate = useNavigate();
     const {user} = useSelector(store=> store.auth)
     const {selectedPost} = useSelector(store => store.post)
     const {posts} = useSelector(store => store.post) 
     const api = import.meta.env.VITE_API || '';
     const [comments, setComments] = useState([])
+    const reactionEmojis = ['❤️','😂','😮','😢','👏'];
     const [commentText, setCommentText] = useState("")
 
     useEffect(() => {
@@ -88,29 +91,157 @@ export default function CommentDialog({open , handleClose }) {
                   {selectedPost?.author?.userName}
                 </p>
               </div>
-               <IconButton>
+                <IconButton>
                 <MoreHorizIcon className="text-gray-500" />
               </IconButton>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {comments.map((comment, index) => (
-                <div key={index}>
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={comment.author?.profilePicture?.link || defaultLogo}
-                      alt="profile"
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                    <p className="text-sm font-semibold">
-                      {comment.author?.userName} .
-                    </p>
-                    <p className="text-sm ml-1">
-                      {comment.text}
-                    </p>
+              {comments.map((comment, index) => {
+                const commentId = comment?._id;
+                const isMyComment = user?.id && comment?.author?._id && (comment.author._id.toString() === user.id.toString());
+
+                return (
+                  <div key={index}>
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={comment.author?.profilePicture?.link || defaultLogo}
+                        alt="profile"
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold">{comment.author?.userName} .</p>
+                        </div>
+                        <p className="text-sm ml-1">{comment.text}</p>
+
+                        {isMyComment && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <Button
+                              variant="text"
+                              size="small"
+                              onClick={() => {
+                                const newText = prompt('Edit comment', comment.text);
+                                if (!newText || !newText.trim()) return;
+                                (async () => {
+                                  try {
+                                    const res = await axios.patch(
+                                      `${api}/api/post/${selectedPost?._id}/comment/${commentId}`,
+                                      { commentText: newText },
+                                      { withCredentials: true }
+                                    );
+                                    if (res.data.success) {
+                                      const updatedComments = comments.map((c) =>
+                                        c._id === commentId ? { ...c, text: newText, reactions: c.reactions } : c
+                                      );
+                                      setComments(updatedComments);
+                                      dispatch(
+                                        setPosts(
+                                          posts.map((p) =>
+                                            p._id === selectedPost._id
+                                              ? { ...p, comments: updatedComments }
+                                              : p
+                                          )
+                                        )
+                                      );
+                                    }
+                                  } catch (e) {
+                                    console.log(e);
+                                  }
+                                })();
+                              }}
+                            >
+                              Edit
+                            </Button>
+
+                            <Button
+                              variant="text"
+                              size="small"
+                              color="error"
+                              onClick={() => {
+                                if (!window.confirm('Delete this comment?')) return;
+                                (async () => {
+                                  try {
+                                    const res = await axios.delete(
+                                      `${api}/api/post/${selectedPost?._id}/comment/${commentId}`,
+                                      { withCredentials: true }
+                                    );
+                                    if (res.data.success) {
+                                      const updatedComments = comments.filter((c) => c._id !== commentId);
+                                      setComments(updatedComments);
+                                      dispatch(
+                                        setPosts(
+                                          posts.map((p) =>
+                                            p._id === selectedPost._id
+                                              ? { ...p, comments: updatedComments }
+                                              : p
+                                          )
+                                        )
+                                      );
+                                    }
+                                  } catch (e) {
+                                    console.log(e);
+                                  }
+                                })();
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Emoji reactions (comment) */}
+                        <div className="mt-2 flex items-center gap-2">
+                          {reactionEmojis.map((emoji) => {
+                            const reaction = comment?.reactions?.find((r) => r.emoji === emoji);
+                            const users = reaction?.users || [];
+                            const count = users.length;
+                            const reactedByMe = users.some((id) => id === user?.id || id?._id === user?.id);
+
+                            return (
+                              <button
+                                key={emoji}
+                                onClick={async () => {
+                                  if (!commentId) return;
+                                  try {
+                                    const res = await axios.post(
+                                      `${api}/api/post/${commentId}/react`,
+                                      { emoji },
+                                      { withCredentials: true }
+                                    );
+                                    if (res.data.success) {
+                                      const updatedComments = comments.map((c) =>
+                                        c._id === commentId ? { ...c, reactions: res.data.reactions } : c
+                                      );
+                                      setComments(updatedComments);
+                                      dispatch(
+                                        setPosts(
+                                          posts.map((p) =>
+                                            p._id === selectedPost._id
+                                              ? { ...p, comments: updatedComments }
+                                              : p
+                                          )
+                                        )
+                                      );
+                                    }
+                                  } catch (e) {
+                                    console.log(e);
+                                  }
+                                }}
+                                className={`text-xs px-2 py-1 rounded-full border transition ${reactedByMe ? 'bg-red-100 border-red-400' : 'border-zinc-700 bg-transparent hover:bg-zinc-800/40'}`}
+                                title="React"
+                              >
+                                <span className="text-base">{emoji}</span>
+                                <span className="ml-1 text-[11px] opacity-80">{count ? count : ''}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <form onSubmit={commentHandler} className="border-t border-gray-300 p-3 flex items-center">

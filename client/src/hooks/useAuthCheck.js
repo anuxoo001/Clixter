@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { toast } from "sonner";
+import apiClient from "../services/apiClient";
 
 export default function useAuthCheck() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -9,11 +9,7 @@ export default function useAuthCheck() {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const api = import.meta.env.VITE_API || '';
-        const res = await axios.get(`${api}/api/user/me`, {
-          withCredentials: true,
-        });
-
+        const res = await apiClient.get('/api/user/me');
 
         if (res.data.success) {
           setIsAuthenticated(true);
@@ -21,11 +17,15 @@ export default function useAuthCheck() {
           setIsAuthenticated(false);
         }
       } catch (error) {
+        const status = error?.response?.status;
         const message = error?.response?.data?.message || error?.message || "Authentication check failed";
-        toast.error(message);
+
+        if (status && status !== 401 && status !== 403) {
+          toast.error(message);
+        }
+
         setIsAuthenticated(false);
       } finally {
-
         setAuthChecked(true); // Mark that check has completed
       }
     };

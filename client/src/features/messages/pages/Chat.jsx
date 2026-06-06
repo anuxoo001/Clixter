@@ -78,14 +78,16 @@ export default function Chat() {
 
 
   return (
-    <div className="relative flex-1 flex flex-col h-screen bg-white text-black">
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+    <div className="relative flex-1 flex flex-col h-screen bg-white text-black dark:bg-slate-950 dark:text-slate-100">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-800 dark:bg-slate-950">
+
         <div className="flex items-center gap-3">
           <img
             src={selectedUserForChat?.profilePicture?.link || defaultlogo}
             className="w-10 h-10 rounded-full"
             alt="user"
           />
+
           <div>
             <p className="font-medium">
               {selectedUserForChat?.fullName} <span className="text-blue-500">✔</span>
@@ -161,7 +163,8 @@ export default function Chat() {
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={sendMessageHandler} className="absolute left-0 bottom-0 border-t bg-white shadow-lg border-gray-200 p-3 flex items-center w-full text-black">
+      <form onSubmit={sendMessageHandler} className="absolute left-0 bottom-0 border-t bg-white shadow-lg border-gray-200 p-3 flex items-center w-full text-black dark:bg-slate-950 dark:text-slate-100 dark:border-slate-800">
+
         {/* <button className="text-xl px-2">😊</button> */}
         <input
           value={messageText}

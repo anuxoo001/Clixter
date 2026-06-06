@@ -170,7 +170,7 @@ const Sidebar = () => {
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         >
-            <div className='p-4 min-w-[150px] font-semibold flex flex-col gap-y-2'>
+            <div className='p-4 min-w-[150px] font-semibold flex flex-col gap-y-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'>
             {/* <Typography className='cursor-pointer hover:bg-gray-200 p-2 rounded-lg'>
               Settings
             </Typography> */}
@@ -191,7 +191,7 @@ const Sidebar = () => {
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         >
-          <div className='p-4 min-w-[300px] max-w-[400px]'>
+          <div className='p-4 min-w-[300px] max-w-[400px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'>
             <Typography variant='h6' className='mb-2 font-semibold'>
               Notifications
             </Typography>

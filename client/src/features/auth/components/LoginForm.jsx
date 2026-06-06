@@ -26,7 +26,7 @@ export default function AuthForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const api = import.meta.env.VITE_API || 'http://localhost:3004';
+      const api = import.meta.env.VITE_API ?? '';
       const res = await axios.post(
         `${api.replace(/\/$/, '')}/api/user/login`,
         input,
@@ -58,26 +58,26 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="relative rounded-[28px] bg-slate-950/90 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.16),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(236,72,153,0.16),transparent_28%)] p-8 shadow-glass ring-1 ring-white/10 backdrop-blur-2xl text-slate-100 border border-slate-700/70">
+    <div className="relative rounded-[28px] bg-slate-100/90 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.08),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(236,72,153,0.08),transparent_28%)] p-8 shadow-glass ring-1 ring-slate-200/30 backdrop-blur-2xl text-slate-950 border border-slate-200/70 dark:bg-slate-950/90 dark:bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.16),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(236,72,153,0.16),transparent_28%)] dark:text-slate-100 dark:ring-white/10 dark:border-slate-700/70">
       <div className="mb-8 space-y-3 text-center">
-        <p className="text-sm uppercase tracking-[0.3em] text-sky-300">Clixter login</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-sky-600 dark:text-sky-300">Clixter login</p>
         <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Sign in to continue</h2>
-        <p className="mx-auto max-w-md text-sm text-slate-400">
+        <p className="mx-auto max-w-md text-sm text-slate-600 dark:text-slate-400">
           Use your account to access posts, stories, chat, and real-time notifications.
         </p>
       </div>
 
       <div className="grid gap-3">
-        <div className="rounded-3xl bg-slate-900/80 p-4 ring-1 ring-white/5 shadow-[0_15px_50px_-40px_rgba(56,189,248,0.8)]">
-          <p className="text-xs uppercase tracking-[0.35em] text-sky-300">Secure access</p>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
+        <div className="rounded-3xl bg-slate-100/90 p-4 ring-1 ring-slate-200/40 shadow-[0_15px_50px_-40px_rgba(15,23,42,0.12)] dark:bg-slate-900/80 dark:ring-white/5 dark:shadow-[0_15px_50px_-40px_rgba(56,189,248,0.8)]">
+          <p className="text-xs uppercase tracking-[0.35em] text-sky-600 dark:text-sky-300">Secure access</p>
+          <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
             Sign in with your email to keep everything safe and connected. Your session is stored securely using modern auth flow.
           </p>
         </div>
       </div>
 
       <form onSubmit={onLoginHandler} className="space-y-4">
-        <label className="block text-sm font-medium text-slate-300">
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
           Email
           <input
             name="email"
@@ -85,12 +85,12 @@ export default function AuthForm() {
             value={input.email}
             onChange={onChangeHandler}
             required
-            className="mt-2 w-full rounded-2xl border border-slate-700/80 bg-slate-900/80 px-4 py-3 text-slate-100 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20"
+            className="mt-2 w-full rounded-2xl border border-slate-300/80 bg-slate-50/90 px-4 py-3 text-slate-900 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 dark:border-slate-700/80 dark:bg-slate-900/80 dark:text-slate-100"
             placeholder="hello@example.com"
           />
         </label>
 
-        <label className="block text-sm font-medium text-slate-300 relative">
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 relative">
           Password
           <input
             name="password"
@@ -98,31 +98,31 @@ export default function AuthForm() {
             value={input.password}
             onChange={onChangeHandler}
             required
-            className="mt-2 w-full rounded-2xl border border-slate-700/80 bg-slate-900/80 px-4 py-3 pr-12 text-slate-100 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20"
+            className="mt-2 w-full rounded-2xl border border-slate-300/80 bg-slate-50/90 px-4 py-3 pr-12 text-slate-900 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 dark:border-slate-700/80 dark:bg-slate-900/80 dark:text-slate-100"
             placeholder="Enter your password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((current) => !current)}
-            className="absolute right-4 top-[50%] -translate-y-1/2 text-slate-400 hover:text-slate-100"
+            className="absolute right-4 top-[50%] -translate-y-1/2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </button>
         </label>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <label className="inline-flex items-center gap-2 text-sm text-slate-300">
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
             <input
               type="checkbox"
               checked={remember}
               onChange={() => setRemember((current) => !current)}
-              className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-sky-400 focus:ring-sky-400"
+              className="h-4 w-4 rounded border-slate-600 bg-slate-50 text-sky-400 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900"
             />
             Remember me
           </label>
           <button
             type="button"
-            className="text-sm font-medium text-sky-300 transition hover:text-sky-100"
+            className="text-sm font-medium text-sky-600 transition hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-100"
             onClick={() => toast('Forgot password flow coming soon.')}
           >
             Forgot password?

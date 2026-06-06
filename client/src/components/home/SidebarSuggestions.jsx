@@ -61,7 +61,8 @@ export default function SidebarSuggestions() {
   }
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-gray-400">Suggested for you</h3>
+      <h3 className="text-sm font-semibold text-gray-400 dark:text-slate-300">Suggested for you</h3>
+
 
       {suggestionUsers.length === 0 ? (
         <p className="text-sm text-gray-500 italic">No suggestions available right now.</p>
@@ -73,12 +74,18 @@ export default function SidebarSuggestions() {
               className="flex items-center gap-2 cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-gray-500 overflow-hidden">
-                <img src={user.profilePicture.link || defaultLogo} alt="" />
+                <img
+                  src={user.profilePicture.link || defaultLogo}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
               </div>
+
               <div>
-                <p className="text-sm text-black font-medium">{user.userName}</p>
-                <p className="text-sm text-gray-500">Suggested for you</p>
+                <p className="text-sm text-black dark:text-slate-100 font-medium">{user.userName}</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Suggested for you</p>
               </div>
+
             </div>
             <button
               onClick={() => followUnfollowHandler(user)}

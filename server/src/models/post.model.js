@@ -5,7 +5,13 @@ const postSchema = new mongoose.Schema({
     media: {type: String , required: true},
     caption: {type: String , default: ''},
     likes: [{type: mongoose.Schema.Types.ObjectId , ref: 'User'}],
-    comments: [{type: mongoose.Schema.Types.ObjectId , ref: 'Comment'}]
+    comments: [{type: mongoose.Schema.Types.ObjectId , ref: 'Comment'}],
+    reactions: [
+        {
+            emoji: { type: String, required: true },
+            users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        }
+    ]
 
 } , {timestamps: true})
 

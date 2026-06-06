@@ -89,24 +89,24 @@ export default function CreatePostDialog({ open, handleClose }) {
       fullWidth
       slotProps={{
         paper: {
-          sx: {
+          sx: (theme) => ({
             width: '50vw',
-            // minHeight: '70vh',
             height: '70vh',
-            backgroundColor: 'white',
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
             borderRadius: 2,
             display: 'flex',
             flexDirection: 'column'
-          }
+          })
         }
       }}
     >
-      <DialogTitle className="text-center text-lg font-semibold bg-gray-200">
+      <DialogTitle className="text-center text-lg font-semibold bg-gray-200 dark:bg-slate-800 dark:text-slate-100">
         Create new post
       </DialogTitle>
 
       <DialogContent
-        className="flex flex-col items-center justify-center flex-1 gap-y-4 bg-white"
+        className="flex flex-col items-center justify-center flex-1 gap-y-4 bg-white dark:bg-slate-900 dark:text-slate-100"
       >
         {/* <div className="text-gray-300 text-6xl flex">
           <ImageIcon style={{ fontSize: 60 }} />
@@ -119,7 +119,7 @@ export default function CreatePostDialog({ open, handleClose }) {
           </div> 
           : 
           <div className="flex-1 flex flex-col gap-y-2">
-            <div className="relative  bg-red-100 w-full overflow-hidden rounded-lg flex items-center justify-center h-[300px]">
+            <div className="relative  bg-red-100 dark:bg-red-900/20 w-full overflow-hidden rounded-lg flex items-center justify-center h-[300px]">
                 <img
                   className="max-h-full max-w-full object-contain"
                   src={imagePreview}
@@ -149,9 +149,9 @@ export default function CreatePostDialog({ open, handleClose }) {
         </Button>
         {imagePreview && (
           isLoading ? 
-          <Button loading loadingPosition="start" startIcon={<SaveIcon />}>Posting...</Button>
+          <Button startIcon={<SaveIcon />}>Posting...</Button>
           :
-          <Button onClick={createPostHandler} className='w-full bg-slate-900 hover:bg-blue-200/50'>Post</Button>
+          <Button onClick={createPostHandler} className='w-full bg-slate-900 dark:bg-sky-600 hover:bg-blue-200/50 dark:hover:bg-sky-500 text-white'>Post</Button>
         )}
       </DialogContent>
     </Dialog>

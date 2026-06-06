@@ -131,18 +131,21 @@ const Inbox = () => {
   }
 
   return (
-    <div className="bg-white text-black border-r border-gray-200 h-screen flex flex-col">
-      <div className="p-4 font-bold text-xl border-gray-700">{user?.userName}</div>
+    <div className="bg-white text-black border-r border-gray-200 h-screen flex flex-col dark:bg-slate-950 dark:text-slate-100 dark:border-slate-800">
+      <div className="p-4 font-bold text-xl border-gray-700 dark:border-slate-800">{user?.userName}</div>
 
-      <div className="flex justify-around text-sm mt-2 border-b border-gray-200">
-        <p className="py-2 text-gray-400">Inbox</p>
+
+      <div className="flex justify-around text-sm mt-2 border-b border-gray-200 dark:border-slate-800">
+        <p className="py-2 text-gray-400 dark:text-slate-300">Inbox</p>
       </div>
+
 
       <div className="px-4 py-2">
         <input
           value={searchTerm}
           onChange={handleSearch}
-          className="w-full bg-gray-200 rounded px-3 py-1 text-sm"
+          className="w-full bg-gray-200 rounded px-3 py-1 text-sm dark:bg-slate-900 dark:text-slate-100" 
+
           placeholder="Search"
         />
       </div>

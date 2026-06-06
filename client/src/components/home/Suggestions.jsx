@@ -3,8 +3,10 @@ const suggestions = ["hp panigrahi", "Suchi💞", "Barsha🇮🇳"];
 
 export default function Suggestions() {
   return (
-    <div className="text-black">
+    <div className="text-slate-100">
       <h3 className="text-lg font-semibold mb-2">Suggestions for you</h3>
+
+
       <div className="flex gap-4 overflow-x-auto">
         {suggestions.map((name, i) => (
           <div key={i} className="flex flex-col items-center w-24 text-center">

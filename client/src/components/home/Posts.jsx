@@ -24,22 +24,43 @@ import { addSuggestionUser, removeSuggestionUser, setAuthUser } from "../../feat
 
 export default function Posts({ data }) {
   const navigate = useNavigate();
+
+  // Prevent crashes when feed data is still loading or contains null items/author
+  if (!data || !data.author) {
+    return (
+      <div className="glass-card p-4">
+        <p className="text-sm text-slate-400">Loading post...</p>
+      </div>
+    );
+  }
+
+
   const dispatch = useDispatch();
   const { user } = useSelector(store => store.auth);
   const { posts } = useSelector(store => store.post);
   const api = import.meta.env.VITE_API || '';
   const [openDialog, setOpenDialog] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
-  const [postLikes, setPostLikes] = useState(data.likes.length);
+  const [postLikes, setPostLikes] = useState(data?.likes?.length || 0);
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState(data.comments);
+  const [comments, setComments] = useState(data?.comments || []);
   const [showHeart, setShowHeart] = useState(false);
+  const [postReactions, setPostReactions] = useState(data?.reactions || []);
+  const [postLikeIds, setPostLikeIds] = useState(data?.likes || []);
+
+
+
 
   useEffect(() => {
     if (data) {
       setComments(data.comments);
     }
   }, [data]);
+
+  useEffect(() => {
+    setPostReactions(data?.reactions || []);
+  }, [data]);
+
 
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
@@ -77,6 +98,15 @@ export default function Posts({ data }) {
       const res = await axios.get(`${api}/api/post/${data._id}/likeordislike`, { withCredentials: true });
       if (res.data.success) {
         setPostLikes(res.data.liked ? postLikes + 1 : postLikes - 1);
+        // update local like ids for instant UI feedback
+        setPostLikeIds((prev) => {
+          const myId = user?.id;
+          const has = prev?.some((id) => id?.toString?.() === myId?.toString?.());
+          if (res.data.liked && !has) return [...(prev || []), myId];
+          if (!res.data.liked && has) return (prev || []).filter((id) => id?.toString?.() !== myId?.toString?.());
+          return prev || [];
+        });
+
         const updatedPosts = posts.map(post =>
           post._id === data._id
             ? {
@@ -142,11 +172,14 @@ export default function Posts({ data }) {
 
   const followUnfollowHandler = async () => {
     try {
-      const res = await axios.get(`${api}/api/user/${data?.author._id}/followunfollow`, { withCredentials: true });
+      const targetUserId = data?.author?._id;
+      if (!targetUserId) return;
+
+      const res = await axios.get(`${api}/api/user/${targetUserId}/followunfollow`, { withCredentials: true });
       if (res.data.success) {
-        const targetUserId = data?.author._id;
         const currentFollowing = user?.following || [];
         const alreadyFollowing = currentFollowing.includes(targetUserId);
+
         const updatedFollowing = alreadyFollowing
           ? currentFollowing.filter(id => id !== targetUserId)
           : [...currentFollowing, targetUserId];
@@ -167,9 +200,10 @@ export default function Posts({ data }) {
   };
 
   const handleDoubleClick = () => {
-    if (!data.likes.includes(user.id)) {
+    if (!postLikeIds.includes(user?.id)) {
       likeOrDislikeHandler();
     }
+
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 1200);
   };
@@ -180,11 +214,12 @@ export default function Posts({ data }) {
     { label: "Delete Post", danger: true, showFor: "author", onClick: deletePostHandler },
     // { label: "Report", danger: true, showFor: "user" },
     {
-      label: user?.following.includes(data?.author._id) ? 'Unfollow' : 'Follow',
+      label: user?.following?.includes(data?.author?._id) ? 'Unfollow' : 'Follow',
       danger: true,
       showFor: "user",
       onClick: followUnfollowHandler
     },
+
     // { label: "Share to...", showFor: "all" },
     // { label: "Copy link", showFor: "all" },
     { label: "About this account", showFor: "user", onClick: () => navigate(`${data?.author._id}/profile`) },
@@ -200,9 +235,10 @@ export default function Posts({ data }) {
     <div className="glass-card p-4 relative">
       <div className="flex items-center justify-between mb-3">
         <div
-          onClick={() => navigate(`${data.author._id}/profile`)}
+          onClick={() => navigate(`${data.author?._id || ''}/profile`)}
           className="flex items-center gap-3 cursor-pointer"
         >
+
           <div className="w-10 h-10 rounded-full overflow-hidden">
             {data.author?.profilePicture?.link ? (
                 <img
@@ -297,7 +333,7 @@ export default function Posts({ data }) {
       <div className="pt-2 px-1">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
-            {data?.likes?.includes(user?.id) ?
+            {postLikeIds?.includes(user?.id) ?
               <FavoriteIcon onClick={likeOrDislikeHandler} sx={{ fontSize: "30px", color: "#ed4956" }} className="cursor-pointer" />
               :
               <FavoriteBorderIcon onClick={likeOrDislikeHandler} sx={{ fontSize: "30px" }} className="cursor-pointer text-slate-100" />}
@@ -309,7 +345,6 @@ export default function Posts({ data }) {
               sx={{ fontSize: "27px" }}
               className="cursor-pointer text-slate-100"
             />
-            {/* <DetailsIcon sx={{ fontSize: "30px", marginBottom: '10PX' }} className="rotate-[50deg] cursor-pointer" /> */}
           </div>
           {user?.bookmarks?.includes(data?._id)
             ? <TurnedInIcon onClick={bookmarkHandler} sx={{ fontSize: "30px", cursor: 'pointer' }} className="text-slate-100" />
@@ -317,7 +352,46 @@ export default function Posts({ data }) {
         </div>
 
         <p className="text-sm font-semibold">{postLikes} likes</p>
-        <p className="text-sm"><span className="font-semibold">{data.author.userName}</span> {data.caption}</p>
+
+        {/* Emoji reactions */}
+        <div className="mt-2 flex items-center gap-2">
+          {['❤️', '😂', '😮', '😢', '👏'].map((emoji) => {
+            const reaction = postReactions?.find((r) => r.emoji === emoji);
+
+
+
+            const users = reaction?.users || [];
+            const count = users.length;
+            const reactedByMe = users.some((id) => id?.toString?.() === user?.id?.toString?.());
+
+            return (
+              <button
+                key={emoji}
+                onClick={async () => {
+                  try {
+                    const res = await axios.post(`${api}/api/post/${data?._id}/react`, { emoji }, { withCredentials: true });
+                    if (res.data.success) {
+                      setPostReactions(res.data.reactions || []);
+                      const updatedPosts = posts.map((post) =>
+                        post._id === data._id ? { ...post, reactions: res.data.reactions } : post
+                      );
+                      dispatch(setPosts(updatedPosts));
+                    }
+
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }}
+                className={`text-sm px-2 py-1 rounded-full border transition ${reactedByMe ? 'bg-red-100 border-red-400' : 'border-zinc-700 bg-transparent hover:bg-zinc-800/40'}`}
+                title="React"
+              >
+                <span className="text-base">{emoji}</span>
+                <span className="ml-1 text-xs opacity-80">{count ? count : ''}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {comments.length > 0 &&
           <button className="text-sm text-slate-400 mt-1" onClick={() => {
             dispatch(setSelectedPost(data));
