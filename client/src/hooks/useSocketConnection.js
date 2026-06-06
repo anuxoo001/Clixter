@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setOnlineUsers } from '../features/messages/messageSlice';
 import { connectSocket, disconnectSocket } from '../features/socket/socket';
 import { setSocket } from '../features/socket/socketSlice';
++import { updatePostReactions } from '../features/posts/postSlice';
 
 export const useSocketConnection = (user) => {
   const dispatch = useDispatch();
@@ -18,11 +19,7 @@ export const useSocketConnection = (user) => {
         dispatch(setOnlineUsers(users));
       });
       socket.on('postReactionsUpdated', ({ postId, reactions }) => {
-        try {
-          dispatch({ type: 'post/updatePostReactions', payload: { postId, reactions } });
-        } catch (e) {
-          // ignore
-        }
+        dispatch(updatePostReactions({ postId, reactions }));
       });
 
       return () => {
