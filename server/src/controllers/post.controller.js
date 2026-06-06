@@ -15,7 +15,9 @@ export const addPost = async (req, res) => {
         const post = await Post.create({
             author: authorId,
             caption,
-            media: media.path
+            media: media.path,
+            published: true,
+            publishedAt: new Date()
         });
 
         const user = await User.findById(authorId);
@@ -65,7 +67,8 @@ export const deletePost = async (req, res) => {
 
 export const getAllPost = async (req, res) => {
     try {
-        const posts = await Post.find().sort({createdAt: -1})
+        // return only published posts sorted by publishedAt (or createdAt)
+        const posts = await Post.find({ published: true }).sort({ publishedAt: -1, createdAt: -1 })
         .populate({path: 'author' , select: 'userName , profilePicture'})
         .populate({path: 'comments' , sort:{createdAt: -1} , populate: {path: 'author' , select: 'userName  profilePicture'}})
 
@@ -286,6 +289,41 @@ export const bookmarkToPost = async (req, res) => {
         }
     } catch (error) {
         return res.status(400).json({ success: false, message: error.message });
+    }
+}
+
+export const schedulePost = async (req, res) => {
+    try {
+        const { caption, scheduledAt } = req.body;
+        const media = req.file;
+        const authorId = req.id;
+
+        if (!media) return res.status(400).json({ success: false, message: "Media required!" });
+        if (!scheduledAt) return res.status(400).json({ success: false, message: "scheduledAt is required" });
+
+        const scheduledDate = new Date(scheduledAt);
+        if (isNaN(scheduledDate.getTime())) return res.status(400).json({ success: false, message: "Invalid scheduledAt" });
+
+        const post = await Post.create({
+            author: authorId,
+            caption,
+            media: media.path,
+            isScheduled: true,
+            scheduledAt: scheduledDate,
+            published: false
+        });
+
+        const user = await User.findById(authorId);
+        if (!user) return res.status(400).json({ success: false, message: "User not registered!" });
+
+        user.posts.push(post._id);
+        await user.save();
+
+        await post.populate({ path: 'author', select: '-password' });
+
+        return res.status(201).json({ success: true, message: 'Post scheduled successfully.' , post });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
     }
 }
 

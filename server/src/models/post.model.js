@@ -4,6 +4,11 @@ const postSchema = new mongoose.Schema({
     author: {type: mongoose.Schema.Types.ObjectId , ref: 'User' , required: true},
     media: {type: String , required: true},
     caption: {type: String , default: ''},
+    // Scheduling fields
+    isScheduled: { type: Boolean, default: false },
+    scheduledAt: { type: Date },
+    published: { type: Boolean, default: true },
+    publishedAt: { type: Date },
     likes: [{type: mongoose.Schema.Types.ObjectId , ref: 'User'}],
     comments: [{type: mongoose.Schema.Types.ObjectId , ref: 'Comment'}],
     reactions: [

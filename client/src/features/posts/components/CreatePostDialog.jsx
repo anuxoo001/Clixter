@@ -35,6 +35,8 @@ export default function CreatePostDialog({ open, handleClose }) {
     const [caption, setCaption] = useState("")
     const [imagePreview, setImagePreview] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [schedule, setSchedule] = useState(false)
+    const [scheduledAt, setScheduledAt] = useState("")
 
     const fileChangeHandler = async (e) => {
         const file = e.target.files[0]
@@ -58,9 +60,11 @@ export default function CreatePostDialog({ open, handleClose }) {
       const formData = new FormData()
       formData.append('caption' , caption)
       if (imagePreview) formData.append('media' , file)
+      if (schedule && scheduledAt) formData.append('scheduledAt', scheduledAt)
       try {
         const api = import.meta.env.VITE_API || '';
-        const res = await axios.post(`${api}/api/post/addpost`, formData, {
+        const endpoint = schedule && scheduledAt ? `${api}/api/post/schedule` : `${api}/api/post/addpost`;
+        const res = await axios.post(endpoint, formData, {
           headers:{
             "Content-Type" : 'multipart/form-data'
           },
@@ -137,6 +141,18 @@ export default function CreatePostDialog({ open, handleClose }) {
 
         }
         <input ref={imageRef} type="file" className=' hidden' onChange={fileChangeHandler} />
+        <div className="flex items-center gap-2 w-full">
+          <input id="schedule" type="checkbox" checked={schedule} onChange={() => setSchedule(s => !s)} />
+          <label htmlFor="schedule" className="text-sm">Schedule post</label>
+        </div>
+        {schedule && (
+          <input
+            type="datetime-local"
+            value={scheduledAt}
+            onChange={(e) => setScheduledAt(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md"
+          />
+        )}
         <Button
           onClick={() => imageRef.current.click()}
           component="label"
@@ -151,7 +167,7 @@ export default function CreatePostDialog({ open, handleClose }) {
           isLoading ? 
           <Button startIcon={<SaveIcon />}>Posting...</Button>
           :
-          <Button onClick={createPostHandler} className='w-full bg-slate-900 dark:bg-sky-600 hover:bg-blue-200/50 dark:hover:bg-sky-500 text-white'>Post</Button>
+          <Button onClick={createPostHandler} className='w-full bg-slate-900 dark:bg-sky-600 hover:bg-blue-200/50 dark:hover:bg-sky-500 text-white'>{schedule ? 'Schedule' : 'Post'}</Button>
         )}
       </DialogContent>
     </Dialog>
