@@ -103,6 +103,9 @@ export const reactToPost = async (req, res) => {
 
     await post.save();
 
+    // broadcast updated reactions so clients can refresh UI
+    io.emit('postReactionsUpdated', { postId, reactions: post.reactions });
+
     // Notify post author (if not self)
     const authorId = post.author.toString();
     if (authorId !== userId) {
@@ -159,6 +162,9 @@ export const reactToComment = async (req, res) => {
     }
 
     await comment.save();
+
+    // broadcast updated comment reactions
+    io.emit('commentReactionsUpdated', { commentId, reactions: comment.reactions });
 
     const authorId = comment.author.toString();
     if (authorId !== userId) {
