@@ -1,3 +1,49 @@
+import Reaction from '../models/reaction.model.js';
+
+export const addReaction = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+    const { userId, type } = req.body;
+    if (!postId || !userId) return res.status(400).json({ message: 'postId and userId are required' });
+
+    // If same reaction from same user exists, update type; otherwise create
+    let reaction = await Reaction.findOne({ postId, userId });
+    if (reaction) {
+      reaction.type = type || reaction.type;
+      await reaction.save();
+      return res.status(200).json({ message: 'Reaction updated', reaction });
+    }
+
+    reaction = new Reaction({ postId, userId, type });
+    await reaction.save();
+    return res.status(201).json({ message: 'Reaction added', reaction });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const removeReaction = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+    const { userId } = req.body;
+    if (!postId || !userId) return res.status(400).json({ message: 'postId and userId are required' });
+    const result = await Reaction.findOneAndDelete({ postId, userId });
+    if (!result) return res.status(404).json({ message: 'Reaction not found' });
+    return res.status(200).json({ message: 'Reaction removed' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getReactionsByPost = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+    const reactions = await Reaction.find({ postId }).lean();
+    return res.status(200).json({ reactions });
+  } catch (err) {
+    next(err);
+  }
+};
 import Post from "../models/post.model.js";
 import Comment from "../models/comment.model.js";
 import User from "../models/user.model.js";
