@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { setPosts, setSelectedPost } from "../../features/posts/postSlice";
 import CommentDialog from "../../features/comments/components/CommentDialog";
 import { addSuggestionUser, removeSuggestionUser, setAuthUser } from "../../features/auth/authSlice";
+import ReactionButton from "../../features/posts/components/ReactionButton";
 
 export default function Posts({ data }) {
   const navigate = useNavigate();
@@ -345,6 +346,7 @@ export default function Posts({ data }) {
               sx={{ fontSize: "27px" }}
               className="cursor-pointer text-slate-100"
             />
+            <ReactionButton postId={data._id} userId={user?.id} />
           </div>
           {user?.bookmarks?.includes(data?._id)
             ? <TurnedInIcon onClick={bookmarkHandler} sx={{ fontSize: "30px", cursor: 'pointer' }} className="text-slate-100" />
