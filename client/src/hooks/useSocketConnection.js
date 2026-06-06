@@ -17,6 +17,13 @@ export const useSocketConnection = (user) => {
       socket.on('getOnlineUsers', (users) => {
         dispatch(setOnlineUsers(users));
       });
+      socket.on('postReactionsUpdated', ({ postId, reactions }) => {
+        try {
+          dispatch({ type: 'post/updatePostReactions', payload: { postId, reactions } });
+        } catch (e) {
+          // ignore
+        }
+      });
 
       return () => {
         disconnectSocket()
