@@ -4,7 +4,7 @@
 This file tracks incremental implementation because "add all" spans multiple major features.
 
 ### In progress
-- [ ] Fix CommentDialog.jsx runtime bug (missing navigate import)
+- [x] Fix CommentDialog.jsx runtime bug (missing navigate import)
 - [x] Comment Edit/Delete (client + server)
 
 ### Next

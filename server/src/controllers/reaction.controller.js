@@ -106,8 +106,9 @@ export const reactToPost = async (req, res) => {
     // broadcast updated reactions so clients can refresh UI
     io.emit('postReactionsUpdated', { postId, reactions: post.reactions });
 
-    // Notify post author (if not self)
     const authorId = post.author.toString();
+
+    // Notify post author (if not self)
     if (authorId !== userId) {
       const user = await User.findById(userId).select('userName profilePicture');
       const notification = {
@@ -119,6 +120,7 @@ export const reactToPost = async (req, res) => {
         message: 'Reacted to your post.',
       };
       const postOwnerSocketId = getSocketId(authorId);
+      console.log('DEBUG notifyPostOwner', { authorId, postOwnerSocketId, ioToCalls: io.to.mock?.calls?.length });
       if (postOwnerSocketId) io.to(postOwnerSocketId).emit('reactionNotification', notification);
     }
 

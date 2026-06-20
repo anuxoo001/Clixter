@@ -78,8 +78,11 @@ export default function CommentDialog({open , handleClose }) {
 
           <div className="w-1/2 bg-white flex flex-col justify-between">
             <div className="p-4 border-b border-gray-300 flex items-center justify-between gap-3">
-              <div  
-                onClick={() => navigate(`${selectedPost?.author._id}/profile`)}
+              <div
+                onClick={() => {
+                  const authorId = selectedPost?.author?._id;
+                  if (authorId) navigate(`/${authorId}/profile`);
+                }}
                 className="flex items-center gap-3 cursor-pointer"
               >
                 <img
