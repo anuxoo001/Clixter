@@ -62,7 +62,7 @@ export default function CreatePostDialog({ open, handleClose }) {
       if (imagePreview) formData.append('media' , file)
       if (schedule && scheduledAt) formData.append('scheduledAt', scheduledAt)
       try {
-        const api = import.meta.env.VITE_API || '';
+        const api = import.meta.env.VITE_API_URL || '';
         const endpoint = schedule && scheduledAt ? `${api}/api/post/schedule` : `${api}/api/post/addpost`;
         const res = await axios.post(endpoint, formData, {
           headers:{

@@ -20,7 +20,7 @@ export default function Chat() {
   const sendMessageHandler = async (e) => {
     e.preventDefault();
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.post(
         `${api}/api/message/send/${selectedUserForChat?._id}`,
         { messageText },

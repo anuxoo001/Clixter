@@ -74,7 +74,7 @@ export default function Stories() {
     }
     setUploading(true);
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const formData = new FormData();
       formData.append('media', storyFile);
       formData.append('caption', storyCaption || 'Story update');

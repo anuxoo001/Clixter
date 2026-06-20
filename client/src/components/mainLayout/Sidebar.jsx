@@ -92,7 +92,7 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.post(`${api}/api/user/logout`, {}, { withCredentials: true });
       if (res.data.success) {
         dispatch(setAuthUser(null));

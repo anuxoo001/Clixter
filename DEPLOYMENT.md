@@ -14,7 +14,7 @@ This repository deploys the React client from the `client` folder on Vercel.
 
 ### Required environment variables on Vercel
 
-- `VITE_API_URL` — URL of your deployed server API (Render service URL)
+- `VITE_API_URL_URL` — URL of your deployed server API (Render service URL)
 
 If your app uses other client-side envs, add them here using the `VITE_` prefix.
 
@@ -47,5 +47,5 @@ This repository uses `render.yaml` to deploy the Express server from the `server
 ## Notes
 
 - Do not commit secret values to Git.
-- After the server is deployed on Render, set `VITE_API_URL` in Vercel to the Render service URL.
+- After the server is deployed on Render, set `VITE_API_URL_URL` in Vercel to the Render service URL.
 - Redeploy the Vercel project after updating environment variables.

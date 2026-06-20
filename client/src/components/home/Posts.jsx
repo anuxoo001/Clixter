@@ -38,7 +38,7 @@ export default function Posts({ data }) {
   const dispatch = useDispatch();
   const { user } = useSelector(store => store.auth);
   const { posts } = useSelector(store => store.post);
-  const api = import.meta.env.VITE_API || '';
+  const api = import.meta.env.VITE_API_URL || '';
   const [openDialog, setOpenDialog] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [postLikes, setPostLikes] = useState(data?.likes?.length || 0);

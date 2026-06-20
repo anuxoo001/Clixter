@@ -47,7 +47,7 @@ const ProfileHeader = () => {
 
   const addToInboxHandler = async (userId) => {
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.get(`${api}/api/user/${userId}/addtomessageinbox`, { withCredentials: true })
       if (res.data.success) {
         const { addedUser } = res.data;
@@ -71,7 +71,7 @@ const ProfileHeader = () => {
 
   const followUnfollowHandler = async (userProfile) => {
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.get(`${api}/api/user/${userProfile?._id}/followunfollow`, { withCredentials: true });
       if (res.data.success) {
         const targetUserId = userProfile?._id

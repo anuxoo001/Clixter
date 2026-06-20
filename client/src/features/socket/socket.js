@@ -3,9 +3,9 @@ import { io } from 'socket.io-client';
 let socket = null;
 
 export const connectSocket = (userId) => {
-  const api = import.meta.env.VITE_API || undefined;
+  const api = import.meta.env.VITE_API_URL || undefined;
 
-  // If VITE_API is missing, socket.io will throw; let caller handle via try/catch if needed.
+  // If VITE_API_URL is missing, socket.io will throw; let caller handle via try/catch if needed.
   socket = io(api, {
     autoConnect: true,
     query: { userId },

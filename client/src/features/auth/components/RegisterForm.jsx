@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 
-const api = import.meta.env.VITE_API || '';
+const api = import.meta.env.VITE_API_URL || '';
 
 export default function RegisterForm() {
   const navigate = useNavigate();

@@ -19,7 +19,7 @@ export default function CommentDialog({open , handleClose }) {
     const {user} = useSelector(store=> store.auth)
     const {selectedPost} = useSelector(store => store.post)
     const {posts} = useSelector(store => store.post) 
-    const api = import.meta.env.VITE_API || '';
+    const api = import.meta.env.VITE_API_URL || '';
     const [comments, setComments] = useState([])
     const reactionEmojis = ['❤️','😂','😮','😢','👏'];
     const [commentText, setCommentText] = useState("")

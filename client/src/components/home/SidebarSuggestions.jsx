@@ -17,7 +17,7 @@ export default function SidebarSuggestions() {
   useEffect(() => {
     const fetchSuggetion = async () =>{
       try {
-        const api = import.meta.env.VITE_API || '';
+        const api = import.meta.env.VITE_API_URL || '';
         const res = await axios.get(`${api}/api/user/suggestions`, { withCredentials: true})
         if(res.data.success){
           // setSideSuggestions(res.data?.suggestionUsers)
@@ -32,7 +32,7 @@ export default function SidebarSuggestions() {
 
   const followUnfollowHandler = async (authorOfUser) => {
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.get(`${api}/api/user/${authorOfUser?._id}/followunfollow`, {withCredentials:true})
       if (res.data.success) {
         const currentFollowing = user?.following || [];

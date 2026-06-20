@@ -31,7 +31,7 @@ export default function Search() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.get(
         `${api}/api/user/${query}/searchprofile`,
         { withCredentials: true }

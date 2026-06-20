@@ -8,7 +8,7 @@ const useGetAlPosts = () => {
     useEffect(() => {
         const fetchAllPost = async () => {
             try {
-                const api = import.meta.env.VITE_API || '';
+                const api = import.meta.env.VITE_API_URL || '';
                 const res = await axios.get(`${api}/api/post/getallposts`, {withCredentials: true})
                 if(res.data.success) {
                     dispatch(setPosts(res.data.posts))

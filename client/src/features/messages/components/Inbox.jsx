@@ -57,7 +57,7 @@ const Inbox = () => {
     }
 
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.get(`${api}/api/user/${value}/searchprofile`, {
         withCredentials: true,
       });
@@ -81,7 +81,7 @@ const Inbox = () => {
 
   const markSeenHandler = async (receiverId) => {
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.get(`${api}/api/message/${receiverId}/markseen`, {
         withCredentials: true,
       });
@@ -108,7 +108,7 @@ const Inbox = () => {
 
   const addToInboxHandler = async (userId) => {
     try {
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.get(`${api}/api/user/${userId}/addtomessageinbox`, { withCredentials: true })
       if (res.data.success) {
         const { addedUser } = res.data;

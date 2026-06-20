@@ -26,7 +26,7 @@ const useGetRTM = () => {
 
       if (!alreadyInInbox) {
         try {
-          const api = import.meta.env.VITE_API || '';
+          const api = import.meta.env.VITE_API_URL || '';
           const res = await axios.get(
             `${api}/api/user/${senderId}/addtomessageinbox`,
             { withCredentials: true }

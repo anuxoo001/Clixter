@@ -8,7 +8,7 @@ const useGetUserProfile = (userId) =>{
     useEffect(() => {
         const fetchUserProfile = async () =>{
            try {
-                const api = import.meta.env.VITE_API || '';
+                const api = import.meta.env.VITE_API_URL || '';
                 const res = await axios.get(`${api}/api/user/${userId}/profile`, { withCredentials: true} )
                 if(res.data.success){
                     dispatch(setUserProfile(res.data.user))

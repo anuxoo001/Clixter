@@ -57,7 +57,7 @@ const UpdateProfile = () => {
         formDataToSend.append('profilePhoto', formData.profilePictureFile);
       }
 
-      const api = import.meta.env.VITE_API || '';
+      const api = import.meta.env.VITE_API_URL || '';
       const res = await axios.post(`${api}/api/user/profile/edit`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
