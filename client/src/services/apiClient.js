@@ -2,8 +2,13 @@ import axios from 'axios'
 
 const rawApiUrl = import.meta.env.VITE_API_URL ?? ''
 
+// If VITE_API_URL is not set on the frontend host (common on Vercel builds),
+// fall back to your deployed backend.
+const rawApiUrlWithFallback = rawApiUrl || 'https://clixter-1.onrender.com'
+
 function normalizeApiUrl(rawUrl) {
   let apiUrl = String(rawUrl).trim()
+
 
   if (!apiUrl) {
     return ''
@@ -26,7 +31,8 @@ function normalizeApiUrl(rawUrl) {
   return apiUrl
 }
 
-const API = normalizeApiUrl(rawApiUrl)
+const API = normalizeApiUrl(rawApiUrlWithFallback)
+
 const apiUrl = API || undefined;
 
 const apiClient = axios.create({
