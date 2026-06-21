@@ -16,22 +16,19 @@ dotenv.config()
 // const app = express();
 
 // Enable CORS — place this BEFORE your routes
+// IMPORTANT: `CLIENT_URLS` is used ONLY for CORS origin matching.
+// Never pass env-derived values into `app.use(<env>)` / `router.get(<env>)`.
 const allowedOrigins = process.env.CLIENT_URLS
-  ? process.env.CLIENT_URLS.split(',').map((s) => s.trim())
+  ? process.env.CLIENT_URLS.split(',').map((s) => s.trim()).filter(Boolean)
   : ['http://localhost:5173', 'http://localhost:5175', 'https://clixter.vercel.app'];
 
 app.use(
   cors({
     origin: (origin, cb) => {
-      // Non-browser requests (no origin) should still work
       if (!origin) return cb(null, true);
-
-      // Allow explicitly configured origins
       if (allowedOrigins.includes(origin)) return cb(null, true);
-
-      // Also hard-allow your deployed frontend
+      // hard allow deployed frontend
       if (origin === 'https://clixter.vercel.app') return cb(null, true);
-
       return cb(new Error(`CORS blocked origin: ${origin}`));
     },
     credentials: true,
@@ -68,6 +65,9 @@ app.get('/', (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
+
+// For this project, `socket.js` creates the HTTP server.
+// Ensure we start it with Express `app` that we configured above.
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
     console.error(`Port ${PORT} is already in use. Please stop the existing server or change PORT.`);
