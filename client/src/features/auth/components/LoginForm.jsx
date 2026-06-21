@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "../authSlice";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import apiClient from "../../../services/apiClient";
 
 export default function AuthForm() {
   const navigate = useNavigate();
@@ -26,9 +27,8 @@ export default function AuthForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const api = import.meta.env.VITE_API_URL ?? '';
-      const res = await axios.post(
-        `${api.replace(/\/$/, '')}/api/user/login`,
+      const res = await apiClient.post(
+        '/api/user/login',
         input,
         {
           headers: {

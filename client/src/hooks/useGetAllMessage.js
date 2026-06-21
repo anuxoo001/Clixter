@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import axios from "axios";
+import apiClient from "../services/apiClient";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessages } from "../features/messages/messageSlice";
 
@@ -12,10 +12,8 @@ const useGetAllMessage = () => {
 
     const fetchAllMessage = async () => {
       try {
-        const api = import.meta.env.VITE_API_URL || '';
-        const res = await axios.get(
-          `${api}/api/message/getall/${selectedUserForChat._id}`,
-          { withCredentials: true }
+        const res = await apiClient.get(
+          `/api/message/getall/${selectedUserForChat._id}`
         );
 
         if (res.data.success) {

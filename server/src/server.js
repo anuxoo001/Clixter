@@ -22,10 +22,27 @@ const allowedOrigins = process.env.CLIENT_URLS
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, cb) => {
+      // Non-browser requests (no origin) should still work
+      if (!origin) return cb(null, true);
+
+      // Allow explicitly configured origins
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+
+      // Also hard-allow your deployed frontend
+      if (origin === 'https://clixter.vercel.app') return cb(null, true);
+
+      return cb(new Error(`CORS blocked origin: ${origin}`));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
   })
 );
+
+// Some hosts require explicit OPTIONS handling for preflight
+app.options('*', cors());
 
 // Middleware to parse JSON
 app.use(express.json());

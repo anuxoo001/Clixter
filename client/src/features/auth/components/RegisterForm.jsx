@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from "../../../services/apiClient";
 import { toast } from "sonner";
-
-const api = import.meta.env.VITE_API_URL || '';
 
 export default function RegisterForm() {
   const navigate = useNavigate();
@@ -24,8 +22,8 @@ export default function RegisterForm() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        `${api}/api/user/register`,
+      const res = await apiClient.post(
+        '/api/user/register',
         input,
         {
           headers: {

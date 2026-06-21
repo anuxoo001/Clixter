@@ -3,14 +3,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
-import axios from 'axios';
 
+import apiClient from '../../../services/apiClient';
 import defaultLogo from '../../../assets/images/defaultlogo.png';
 import { setAuthUser, setSelestedUserForChat } from '../../auth/authSlice';
 import { removeSeenMessagesFromUser } from '../messageSlice';
 import useGetRTM from '../../../hooks/useGetRTM';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
+
   '& .MuiBadge-badge': {
     backgroundColor: '#44b700',
     color: '#44b700',
@@ -57,10 +58,7 @@ const Inbox = () => {
     }
 
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.get(`${api}/api/user/${value}/searchprofile`, {
-        withCredentials: true,
-      });
+      const res = await apiClient.get(`/api/user/${value}/searchprofile`);
 
       if (res.data.success) {
         const filteredUsers = (res.data.users || []).filter(
@@ -81,10 +79,7 @@ const Inbox = () => {
 
   const markSeenHandler = async (receiverId) => {
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.get(`${api}/api/message/${receiverId}/markseen`, {
-        withCredentials: true,
-      });
+      const res = await apiClient.get(`/api/message/${receiverId}/markseen`);
 
       if (res.data.success) {
         dispatch(removeSeenMessagesFromUser(receiverId));
@@ -108,8 +103,7 @@ const Inbox = () => {
 
   const addToInboxHandler = async (userId) => {
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.get(`${api}/api/user/${userId}/addtomessageinbox`, { withCredentials: true })
+      const res = await apiClient.get(`/api/user/${userId}/addtomessageinbox`);
       if (res.data.success) {
         const { addedUser } = res.data;
         const alreadyExists = user.messageInbox?.some(

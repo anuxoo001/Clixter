@@ -1,15 +1,12 @@
 import { io } from 'socket.io-client';
+import { API as API_URL } from '../../services/apiClient';
 
 let socket = null;
 
 export const connectSocket = (userId) => {
-  const api = import.meta.env.VITE_API_URL || undefined;
-
-  // If VITE_API_URL is missing, socket.io will throw; let caller handle via try/catch if needed.
-  socket = io(api, {
+  socket = io(API_URL, {
     autoConnect: true,
     query: { userId },
-    // Allow socket.io to choose the best transport (polling -> websocket fallback)
     transports: ['polling', 'websocket'],
     reconnectionAttempts: 5,
     reconnectionDelay: 500,

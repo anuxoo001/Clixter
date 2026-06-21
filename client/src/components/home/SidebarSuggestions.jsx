@@ -17,10 +17,8 @@ export default function SidebarSuggestions() {
   useEffect(() => {
     const fetchSuggetion = async () =>{
       try {
-        const api = import.meta.env.VITE_API_URL || '';
-        const res = await axios.get(`${api}/api/user/suggestions`, { withCredentials: true})
+        const res = await apiClient.get('/api/user/suggestions')
         if(res.data.success){
-          // setSideSuggestions(res.data?.suggestionUsers)
           dispatch(setSuggestionUsers(res.data?.suggestionUsers))
         }
       } catch (error) {
@@ -32,8 +30,7 @@ export default function SidebarSuggestions() {
 
   const followUnfollowHandler = async (authorOfUser) => {
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.get(`${api}/api/user/${authorOfUser?._id}/followunfollow`, {withCredentials:true})
+      const res = await apiClient.get(`/api/user/${authorOfUser?._id}/followunfollow`)
       if (res.data.success) {
         const currentFollowing = user?.following || [];
         const targetUserId = authorOfUser?._id

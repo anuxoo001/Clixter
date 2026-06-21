@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addUnSeenMessages, setMessages } from "../features/messages/messageSlice";
 import { setAuthUser } from "../features/auth/authSlice";
 import { getSocket } from "../features/socket/socket";
-import axios from "axios";
+import apiClient from "../services/apiClient";
 
 const useGetRTM = () => {
   const dispatch = useDispatch();
@@ -26,10 +26,8 @@ const useGetRTM = () => {
 
       if (!alreadyInInbox) {
         try {
-          const api = import.meta.env.VITE_API_URL || '';
-          const res = await axios.get(
-            `${api}/api/user/${senderId}/addtomessageinbox`,
-            { withCredentials: true }
+          const res = await apiClient.get(
+            `/api/user/${senderId}/addtomessageinbox`
           );
 
           if (res.data.success) {

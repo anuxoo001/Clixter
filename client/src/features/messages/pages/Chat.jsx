@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "../../../services/apiClient";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {  setMessages } from "../messageSlice";
@@ -20,9 +20,8 @@ export default function Chat() {
   const sendMessageHandler = async (e) => {
     e.preventDefault();
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.post(
-        `${api}/api/message/send/${selectedUserForChat?._id}`,
+      const res = await apiClient.post(
+        `/api/message/send/${selectedUserForChat?._id}`,
         { messageText },
         {
           headers: {

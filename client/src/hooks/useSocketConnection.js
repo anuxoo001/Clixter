@@ -1,10 +1,10 @@
 // hooks/useSocket.js
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setOnlineUsers } from '../features/messages/messageSlice';
 import { connectSocket, disconnectSocket } from '../features/socket/socket';
 import { setSocket } from '../features/socket/socketSlice';
-+import { updatePostReactions } from '../features/posts/postSlice';
+import { updatePostReactions } from '../features/posts/postSlice';
 
 export const useSocketConnection = (user) => {
   const dispatch = useDispatch();
@@ -23,12 +23,13 @@ export const useSocketConnection = (user) => {
       });
 
       return () => {
-        disconnectSocket()
-        dispatch(setSocket(null))
+        disconnectSocket();
+        dispatch(setSocket(null));
       };
     } else {
       disconnectSocket();
-      dispatch(setSocket(null))
+      dispatch(setSocket(null));
     }
+
   }, [user, dispatch]);
 };
