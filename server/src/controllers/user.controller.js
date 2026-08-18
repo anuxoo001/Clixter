@@ -55,56 +55,12 @@ export const loginUser = async (req, res) => {
       });
     }
     const token = await jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-    const populatedPost = await Promise.all(
-      user.posts.map(async (postId) => {
-        const post = await Post.findById(postId)
-        if (post.author.equals(user._id)) {
-          return post
-        }
-        return null
-      })
-    )
-    const populatedInbox = await Promise.all(
-      user.messageInbox.map(async (userId) => {
-        const user = await User.findById(userId)
-        return user
-      })
-    )
-    const auther = {
-      id: user._id,
-      fullName: user.fullName,
-      userName: user.userName,
-      email: user.email,
-      gender: user.gender,
-      profilePicture: user.profilePicture,
-      bio: user.bio,
-      followers: user.followers,
-      following: user.following,
-      posts: populatedPost,
-      bookmarks: user.bookmarks,
-      messageInbox: populatedInbox
-    };
-    const cookieOptions = {
-      httpOnly: true,
-      maxAge: 1 * 24 * 60 * 60 * 1000,
-    };
 
-    if (process.env.NODE_ENV === "production") {
-      cookieOptions.sameSite = "none";
-      cookieOptions.secure = true;
-    } else {
-      cookieOptions.sameSite = "lax";
-      cookieOptions.secure = false;
-    }
-
-    return res
-      .status(200)
-      .cookie("token", token, cookieOptions)
-      .json({
-        success: true,
-        message: `Welcome back ${user.userName}`,
-        auther,
-      });
+    return res.status(200).json({
+      success: true,
+      message: `Welcome back ${user.userName}`,
+      token,
+    });
   } catch (err) {
     res.status(401).json({ success: false, message: err.message });
   }

@@ -27,6 +27,8 @@ const isAllowedOrigin = (origin) => {
   if (allowedOrigins.includes(origin)) return true;
   // allow any Vercel deployment origin
   if (origin.endsWith('.vercel.app')) return true;
+  // allow any Render deployment origin (e.g., clixter-1.onrender.com, clixter-8.onrender.com)
+  if (origin.includes('.onrender.com')) return true;
   // hard allow deployed frontend
   if (origin === 'https://clixter.vercel.app') return true;
   return false;

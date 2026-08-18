@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "../authSlice";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import apiClient from "../../../services/apiClient";
 
 export default function AuthForm() {
   const navigate = useNavigate();
@@ -15,8 +13,6 @@ export default function AuthForm() {
     password: ''
   });
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(true);
 
   const onChangeHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -26,25 +22,14 @@ export default function AuthForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await apiClient.post(
-        '/api/user/login',
-        input,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        }
-      );
+      const res = await apiClient.post('/api/user/login', input, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
+        localStorage.setItem('clixter_token', res.data.token);
         dispatch(setAuthUser(res.data.auther));
         toast.success(res.data.message);
-        if (remember) {
-          localStorage.setItem('clixter_remember', JSON.stringify({ email: input.email }));
-        } else {
-          localStorage.removeItem('clixter_remember');
-        }
         navigate("/", { replace: true });
       }
 
@@ -70,7 +55,7 @@ export default function AuthForm() {
         <div className="rounded-3xl bg-slate-100/90 p-4 ring-1 ring-slate-200/40 shadow-[0_15px_50px_-40px_rgba(15,23,42,0.12)] dark:bg-slate-900/80 dark:ring-white/5 dark:shadow-[0_15px_50px_-40px_rgba(56,189,248,0.8)]">
           <p className="text-xs uppercase tracking-[0.35em] text-sky-600 dark:text-sky-300">Secure access</p>
           <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
-            Sign in with your email to keep everything safe and connected. Your session is stored securely using modern auth flow.
+            Sign in with your email to keep everything safe and connected.
           </p>
         </div>
       </div>
@@ -93,35 +78,28 @@ export default function AuthForm() {
           Password
           <input
             name="password"
-            type={showPassword ? 'text' : 'password'}
+            type="password"
             value={input.password}
             onChange={onChangeHandler}
             required
             className="mt-2 w-full rounded-2xl border border-slate-300/80 bg-slate-50/90 px-4 py-3 pr-12 text-slate-900 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 dark:border-slate-700/80 dark:bg-slate-900/80 dark:text-slate-100"
             placeholder="Enter your password"
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((current) => !current)}
-            className="absolute right-4 top-[50%] -translate-y-1/2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
         </label>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
             <input
               type="checkbox"
-              checked={remember}
-              onChange={() => setRemember((current) => !current)}
+              checked={true}
+              onChange={() => {}}
               className="h-4 w-4 rounded border-slate-600 bg-slate-50 text-sky-400 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900"
             />
             Remember me
           </label>
           <button
             type="button"
-            className="text-sm font-medium text-sky-600 transition hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-100"
+            className="text-sm font-medium text-sky-600 transition hover:text-sky-800 dark:text-sky-300 dark:hover:text-slate-100"
             onClick={() => toast('Forgot password flow coming soon.')}
           >
             Forgot password?
@@ -140,14 +118,14 @@ export default function AuthForm() {
       <div className="mt-6 rounded-3xl bg-slate-900/80 p-4 text-sm text-slate-400 ring-1 ring-white/5">
         <p className="font-semibold text-slate-100">Made for professionals</p>
         <ul className="mt-3 space-y-2 text-slate-400">
-          <li>• Modern password-based login with secure cookies.</li>
-          <li>• Remember me keeps your session smooth and seamless.</li>
+          <li>• Modern password-based login.</li>
+          <li>• Session stored in localStorage.</li>
           <li>• Clean interface with premium gradients and motion.</li>
         </ul>
       </div>
 
       <div className="mt-6 text-center text-sm text-slate-400">
-        Don’t have an account?{' '}
+        Don't have an account?{' '}
         <button
           type="button"
           onClick={() => navigate("/auth-register")}
