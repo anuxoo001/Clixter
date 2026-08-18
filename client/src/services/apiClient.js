@@ -4,7 +4,7 @@ const rawApiUrl = import.meta.env.VITE_API_URL ?? ''
 
 // If VITE_API_URL is not set on the frontend host (common on Vercel builds),
 // fall back to your deployed backend.
-const rawApiUrlWithFallback = rawApiUrl || 'https://clixter-1.onrender.com'
+const rawApiUrlWithFallback = rawApiUrl || 'https://clixter-server.onrender.com'
 
 function normalizeApiUrl(rawUrl) {
   let apiUrl = String(rawUrl).trim()
