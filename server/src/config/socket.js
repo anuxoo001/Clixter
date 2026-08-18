@@ -10,9 +10,16 @@ const allowedOrigins = (process.env.CLIENT_URLS || 'http://localhost:5173,http:/
   .split(',')
   .map((s) => s.trim())
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (origin.endsWith('.vercel.app')) return true;
+  return false;
+}
+
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
+        origin: isAllowedOrigin,
         methods: ['GET', 'POST'],
     }
 })

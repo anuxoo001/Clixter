@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import defaultLogo from "../../assets/images/defaultlogo.png";
 import {
   Dialog,
   DialogContent,
@@ -25,16 +24,6 @@ import { addSuggestionUser, removeSuggestionUser, setAuthUser } from "../../feat
 export default function Posts({ data }) {
   const navigate = useNavigate();
 
-  // Prevent crashes when feed data is still loading or contains null items/author
-  if (!data || !data.author) {
-    return (
-      <div className="glass-card p-4">
-        <p className="text-sm text-slate-400">Loading post...</p>
-      </div>
-    );
-  }
-
-
   const dispatch = useDispatch();
   const { user } = useSelector(store => store.auth);
   const { posts } = useSelector(store => store.post);
@@ -48,9 +37,6 @@ export default function Posts({ data }) {
   const [postReactions, setPostReactions] = useState(data?.reactions || []);
   const [postLikeIds, setPostLikeIds] = useState(data?.likes || []);
 
-
-
-
   useEffect(() => {
     if (data) {
       setComments(data.comments);
@@ -60,6 +46,15 @@ export default function Posts({ data }) {
   useEffect(() => {
     setPostReactions(data?.reactions || []);
   }, [data]);
+
+  // Prevent crashes when feed data is still loading or contains null items/author
+  if (!data || !data.author) {
+    return (
+      <div className="glass-card p-4">
+        <p className="text-sm text-slate-400">Loading post...</p>
+      </div>
+    );
+  }
 
 
   const handleOpenDialog = () => setOpenDialog(true);

@@ -65,10 +65,11 @@ export const markSeen = async (req, res) => {
         const senderId = req.id;
         const receiverId = req.params.id;
 
+        // Mark messages FROM the chat partner (req.params.id) TO the current user as seen
         await Message.updateMany(
         {
-            senderId,
-            receiverId,
+            senderId: receiverId,
+            receiverId: senderId,
             isSeen: false,
         },
         {

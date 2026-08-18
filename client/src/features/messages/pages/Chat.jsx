@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {  setMessages } from "../messageSlice";
 import useGetAllMessage from "../../../hooks/useGetAllMessage";
 import defaultlogo from "../../../assets/images/defaultlogo.png";
-import useGetRTM from "../../../hooks/useGetRTM";
 
 export default function Chat() {
   useGetAllMessage();

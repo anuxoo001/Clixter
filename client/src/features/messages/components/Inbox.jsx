@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
@@ -77,7 +77,7 @@ const Inbox = () => {
     ).length;
   };
 
-  const markSeenHandler = async (receiverId) => {
+  const markSeenHandler = useCallback(async (receiverId) => {
     try {
       const res = await apiClient.get(`/api/message/${receiverId}/markseen`);
 
@@ -87,7 +87,7 @@ const Inbox = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     if (!selectedUserForChat) return;
@@ -99,7 +99,7 @@ const Inbox = () => {
     if (hasNewMessageFromSelectedUser) {
       markSeenHandler(selectedUserForChat);
     }
-  }, [unSeenMessages, selectedUserForChat]);
+  }, [unSeenMessages, selectedUserForChat, markSeenHandler, user?.id]);
 
   const addToInboxHandler = async (userId) => {
     try {
@@ -145,9 +145,9 @@ const Inbox = () => {
       </div>
 
       <div className="flex flex-col px-2 overflow-y-auto">
-        {[...user?.messageInbox]
+        {[...(user?.messageInbox || [])]
           ?.sort((a, b) => getUnseenCount(b._id) - getUnseenCount(a._id))
-          .map((userItem, i) => {
+          .map((userItem) => {
             const isOnline = onlineUsers.includes(userItem?._id);
             const isSelected = selectedUserForChat === userItem._id;
             const unseenCount = getUnseenCount(userItem._id);

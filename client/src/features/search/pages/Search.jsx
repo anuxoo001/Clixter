@@ -21,28 +21,24 @@ export default function Search() {
       return;
     }
 
-    const delayDebounce = setTimeout(() => {
-      fetchUsers();
+    const delayDebounce = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const api = import.meta.env.VITE_API_URL || '';
+        const res = await axios.get(
+          `${api}/api/user/${query}/searchprofile`,
+          { withCredentials: true }
+        );
+        setResults(res.data.users);
+      } catch (err) {
+        console.error("Search failed:", err);
+      } finally {
+        setLoading(false);
+      }
     }, 300);
 
     return () => clearTimeout(delayDebounce);
   }, [query]);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.get(
-        `${api}/api/user/${query}/searchprofile`,
-        { withCredentials: true }
-      );
-      setResults(res.data.users);
-    } catch (err) {
-      console.error("Search failed:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const shouldShowIcon =
     query.trim().length === 0 && !loading && results.length === 0;

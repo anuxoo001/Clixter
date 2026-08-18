@@ -120,7 +120,6 @@ export const reactToPost = async (req, res) => {
         message: 'Reacted to your post.',
       };
       const postOwnerSocketId = getSocketId(authorId);
-      console.log('DEBUG notifyPostOwner', { authorId, postOwnerSocketId, ioToCalls: io.to.mock?.calls?.length });
       if (postOwnerSocketId) io.to(postOwnerSocketId).emit('reactionNotification', notification);
     }
 

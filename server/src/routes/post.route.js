@@ -13,7 +13,7 @@ router.get('/getallposts' , verifyToken, getAllPost);
 router.get('/getuserspost' , verifyToken, getUserPost);
 router.get('/:id/likeordislike' , verifyToken, likeDislikeToPost);
 router.post('/:id/react' , verifyToken, reactToPost);
-router.post('/:commentId/react', verifyToken, reactToComment);
+router.post('/comment/:commentId/react', verifyToken, reactToComment);
 router.post('/:id/addcomment' , verifyToken, addCommentOnPost);
 router.patch('/:postId/comment/:commentId' , verifyToken, editCommentOnPost);
 router.delete('/:postId/comment/:commentId' , verifyToken, deleteCommentOnPost);

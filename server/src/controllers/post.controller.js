@@ -69,8 +69,8 @@ export const getAllPost = async (req, res) => {
     try {
         // return only published posts sorted by publishedAt (or createdAt)
         const posts = await Post.find({ published: true }).sort({ publishedAt: -1, createdAt: -1 })
-        .populate({path: 'author' , select: 'userName , profilePicture'})
-        .populate({path: 'comments' , sort:{createdAt: -1} , populate: {path: 'author' , select: 'userName  profilePicture'}})
+        .populate({path: 'author' , select: 'userName profilePicture'})
+        .populate({path: 'comments' , sort:{createdAt: -1} , populate: {path: 'author' , select: 'userName profilePicture'}})
 
         return res.status(201).json({ success: true,  posts });
     } catch (error) {
@@ -83,13 +83,13 @@ export const getUserPost = async (req , res) =>{
         const authorId = req.id;
         const posts = await Post.find({author: authorId}).sort({createdAt: -1}).populate({
             path: 'author',
-            select: 'userName, profilePicture'
+            select: 'userName profilePicture'
         }).populate({
             path: 'comments',
-            sort: {createdAt},
+            sort: {createdAt: -1},
             populate: {
                 path: 'author',
-                select: 'userName, profilePicture'
+                select: 'userName profilePicture'
             }
         })
         return res.status(201).json({ success: true,  posts });
@@ -121,7 +121,7 @@ export const likeDislikeToPost = async (req, res) => {
                     userId: authorId,
                     userDetails: user,
                     postId,
-                    message: 'Your post was liked.'
+                    message: 'Your post was unliked.'
                 }
                 const postOnwerSocktId = getSocketId(postOnwerId)
                 if(postOnwerSocktId){
@@ -197,7 +197,7 @@ export const getCommentOfPost = async (req, res) => {
         
         const comments = await Comment.find({post: postId}).populate({
             path: 'author',
-            select: 'userName, profilePicture'
+            select: 'userName profilePicture'
         })
         
         if (!comments) return res.status(401).json({success: false, message: 'No comments on this Post!'})

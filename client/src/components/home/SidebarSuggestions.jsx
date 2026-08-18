@@ -1,9 +1,9 @@
-import React, { useState , useEffect } from "react";
-import axios from "axios";
+import React, { useEffect } from "react";
 import defaultLogo from "../../assets/images/defaultlogo.png"
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addSuggestionUser, removeSuggestionUser, setAuthUser, setSuggestionUsers } from "../../features/auth/authSlice";
+import apiClient from "../../services/apiClient";
 import { toast } from "sonner";
 
 
@@ -26,7 +26,7 @@ export default function SidebarSuggestions() {
       }
     }
     fetchSuggetion()
-  },[])
+  },[dispatch])
 
   const followUnfollowHandler = async (authorOfUser) => {
     try {

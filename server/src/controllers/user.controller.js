@@ -1,6 +1,5 @@
 import User from "../models/user.model.js";
 import Post from "../models/post.model.js";
-import Comment from "../models/comment.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { getSocketId , io } from "../config/socket.js";
@@ -118,7 +117,7 @@ export const logoutUser = async (req, res) => {
       message: "Logged out Successfully.",
     });
   } catch (error) {
-    res.status(401).json({ success: false, message: err.message });
+    res.status(401).json({ success: false, message: error.message });
   }
 };
 
@@ -133,7 +132,7 @@ export const searchProfile = async (req, res) => {
     return res.status(201).json({success: true, users})
 
   } catch (error) {
-    res.status(401).json({ success: false, message: err.message });
+    res.status(401).json({ success: false, message: error.message });
   }
 }
 
@@ -152,7 +151,7 @@ export const getProfile = async (req, res) => {
     }
     return res.status(201).json({ success: true, user });
   } catch (error) {
-    res.status(401).json({ success: false, message: err.message });
+    res.status(401).json({ success: false, message: error.message });
   }
 };
 
@@ -190,7 +189,7 @@ export const editProfile = async (req, res) => {
 
 
   } catch (error) {
-    res.status(401).json({ success: false, message: err.message });
+    res.status(401).json({ success: false, message: error.message });
   }
 };
 
@@ -309,64 +308,5 @@ export const addToMessageInbox = async (req, res) => {
     
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
-  }
-}
-
-// ADMIN/MAINTENANCE: delete N oldest users in database (and their posts/comments)
-export const deleteOldestUsers = async (req, res) => {
-  try {
-    const countRaw = req.params.count;
-    const count = Number(countRaw);
-
-    if (!Number.isInteger(count) || count <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid count" });
-    }
-
-    const users = await User.find({})
-      .sort({ createdAt: 1 })
-      .limit(count);
-
-    if (!users.length) {
-      return res.status(200).json({ success: true, message: "No users found", deletedUsers: [] });
-    }
-
-    const userIds = users.map((u) => u._id);
-
-    // Posts authored by those users
-    const posts = await Post.find({ author: { $in: userIds } }).select('_id');
-    const postIds = posts.map((p) => p._id);
-
-    // Remove comments + posts
-    if (postIds.length) {
-      await User.updateMany({
-        $pull: {
-          posts: { $in: postIds },
-          bookmarks: { $in: postIds },
-        }
-      });
-
-      await Comment.deleteMany({ post: { $in: postIds } });
-      await Post.deleteMany({ _id: { $in: postIds } });
-    }
-
-    // Remove references + delete users (best-effort)
-    await User.updateMany({
-      $pull: {
-        followers: { $in: userIds },
-        following: { $in: userIds },
-        messageInbox: { $in: userIds },
-      }
-    });
-
-    await User.deleteMany({ _id: { $in: userIds } });
-
-    return res.status(200).json({
-      success: true,
-      message: `Deleted ${users.length} oldest users`,
-      deletedUsers: userIds,
-      deletedPosts: postIds,
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
   }
 }

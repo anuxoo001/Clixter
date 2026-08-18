@@ -28,8 +28,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setAuthUser } from '../../features/auth/authSlice';
 import defaultLogo from "../../assets/images/defaultlogo.png";
 import CreatePostDialog from '../../features/posts/components/CreatePostDialog';
-import { clearNotifications, setFollowNotification, setLikeNotification } from '../../features/notifications/notificationSlice';
-import { addUnSeenMessages, clearUnSeenMessages } from '../../features/messages/messageSlice';
+import { clearNotifications } from '../../features/notifications/notificationSlice';
 
 const SidebarItem = ({ data, Icon, label, onClick, likeNotification, followNotification }) => (
   <Tooltip title={label} arrow>

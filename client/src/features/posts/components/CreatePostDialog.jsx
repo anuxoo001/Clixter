@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogTitle, Button } from '@mui/material';
 import { Image as ImageIcon, Movie as MovieIcon } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
 import { useEffect, useRef , useState } from 'react';
 import { readFileAsDataURL } from '../../../utils/readFileAsDataURL';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -55,7 +54,7 @@ export default function CreatePostDialog({ open, handleClose }) {
           setImagePreview("")
     } , [handleClose])
 
-    const createPostHandler = async (e) => {
+    const createPostHandler = async () => {
       setIsLoading(true)
       const formData = new FormData()
       formData.append('caption' , caption)

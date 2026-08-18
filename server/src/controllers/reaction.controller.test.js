@@ -61,15 +61,13 @@ describe('reaction.controller', () => {
       save,
     };
     Post.findById.mockResolvedValue(post);
-    User.findById.mockResolvedValue({
-      select: vi.fn(() => Promise.resolve({ userName: 'TestUser', profilePicture: 'pic' })),
+    User.findById.mockReturnValue({
+      select: vi.fn().mockResolvedValue({ userName: 'TestUser', profilePicture: 'pic' }),
     });
     getSocketId.mockReturnValue('socket-1');
 
     const req = { id: 'user-1', params: { id: 'post-1' }, body: { emoji: '❤️' } };
     const res = createResponse();
-    console.log('TEST PRECALL io.to function', io.to);
-    console.log('TEST PRECALL getSocketId function', getSocketId);
 
     await reactToPost(req, res);
 
@@ -89,8 +87,8 @@ describe('reaction.controller', () => {
       save,
     };
     Post.findById.mockResolvedValue(post);
-    User.findById.mockResolvedValue({
-      select: vi.fn(() => Promise.resolve({ userName: 'TestUser', profilePicture: 'pic' })),
+    User.findById.mockReturnValue({
+      select: vi.fn().mockResolvedValue({ userName: 'TestUser', profilePicture: 'pic' }),
     });
     getSocketId.mockReturnValue('socket-1');
 
@@ -98,7 +96,6 @@ describe('reaction.controller', () => {
     const res = createResponse();
 
     await reactToPost(req, res);
-    console.log('TEST DEBUG after reactToPost io.to.calls', io.to.mock.calls);
 
     expect(save).toHaveBeenCalled();
     expect(post.reactions).toEqual([]);
@@ -126,8 +123,8 @@ describe('reaction.controller', () => {
       save,
     };
     Comment.findById.mockResolvedValue(comment);
-    User.findById.mockResolvedValue({
-      select: vi.fn(() => Promise.resolve({ userName: 'TestUser', profilePicture: 'pic' })),
+    User.findById.mockReturnValue({
+      select: vi.fn().mockResolvedValue({ userName: 'TestUser', profilePicture: 'pic' }),
     });
     getSocketId.mockReturnValue('socket-1');
 
@@ -142,3 +139,4 @@ describe('reaction.controller', () => {
     expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Reaction updated', reactions: comment.reactions });
   });
 });
+

@@ -4,7 +4,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 const UserSaved = () => {
-  const { userProfile ,  user } = useSelector(store => store.user);
+  const { userProfile } = useSelector(store => store.user);
 
   const hasBookmarks = userProfile?.bookmarks && userProfile.bookmarks.length > 0;
 

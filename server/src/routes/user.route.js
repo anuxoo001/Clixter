@@ -1,5 +1,5 @@
 import express from "express"
-import { registerUser, loginUser , logoutUser, getProfile, editProfile, getSuggestions, followUnfollow, searchProfile, addToMessageInbox, deleteOldestUsers } from '../controllers/user.controller.js';
+import { registerUser, loginUser , logoutUser, getProfile, editProfile, getSuggestions, followUnfollow, searchProfile, addToMessageInbox } from '../controllers/user.controller.js';
 import verifyToken from "../middlewares/verifyToken.js"
 import upload from "../middlewares/multer.js";
 
@@ -14,10 +14,6 @@ router.post('/profile/edit' , verifyToken , upload.single('profilePhoto'), editP
 router.get('/suggestions' , verifyToken,  getSuggestions)
 router.get('/:id/followunfollow' , verifyToken, followUnfollow)
 router.get('/:id/addtomessageinbox' , verifyToken, addToMessageInbox)
-
-// ADMIN/MAINTENANCE (dev): delete N oldest users in database
-// Example: DELETE /api/user/admin/delete-old-accounts/2
-router.delete('/admin/delete-old-accounts/:count', verifyToken, deleteOldestUsers)
 
 router.get("/me", verifyToken, (req, res) => {
   res.status(200).json({

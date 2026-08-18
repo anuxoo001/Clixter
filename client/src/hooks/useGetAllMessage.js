@@ -29,7 +29,7 @@ const useGetAllMessage = () => {
     };
 
     fetchAllMessage();
-  }, [selectedUserForChat]);
+  }, [selectedUserForChat, dispatch]);
 };
 
 export default useGetAllMessage;

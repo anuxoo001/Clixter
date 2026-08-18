@@ -22,13 +22,20 @@ const allowedOrigins = process.env.CLIENT_URLS
   ? process.env.CLIENT_URLS.split(',').map((s) => s.trim()).filter(Boolean)
   : ['http://localhost:5173', 'http://localhost:5175', 'https://clixter.vercel.app'];
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  // allow any Vercel deployment origin
+  if (origin.endsWith('.vercel.app')) return true;
+  // hard allow deployed frontend
+  if (origin === 'https://clixter.vercel.app') return true;
+  return false;
+};
+
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (allowedOrigins.includes(origin)) return cb(null, true);
-      // hard allow deployed frontend
-      if (origin === 'https://clixter.vercel.app') return cb(null, true);
+      if (isAllowedOrigin(origin)) return cb(null, true);
       return cb(new Error(`CORS blocked origin: ${origin}`));
     },
     credentials: true,

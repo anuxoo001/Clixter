@@ -208,7 +208,7 @@ export default function CommentDialog({open , handleClose }) {
                                   if (!commentId) return;
                                   try {
                                     const res = await axios.post(
-                                      `${api}/api/post/${commentId}/react`,
+                                      `${api}/api/post/comment/${commentId}/react`,
                                       { emoji },
                                       { withCredentials: true }
                                     );
