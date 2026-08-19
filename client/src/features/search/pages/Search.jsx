@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
 import Avatar from "@mui/material/Avatar";
 import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
+import apiClient from "../../../services/apiClient";
 
 export default function Search() {
   const inputRef = useRef(null);
@@ -24,10 +24,8 @@ export default function Search() {
     const delayDebounce = setTimeout(async () => {
       try {
         setLoading(true);
-        const api = import.meta.env.VITE_API_URL || '';
-        const res = await axios.get(
-          `${api}/api/user/${query}/searchprofile`,
-          { withCredentials: true }
+        const res = await apiClient.get(
+          `/api/user/${query}/searchprofile`
         );
         setResults(res.data.users);
       } catch (err) {

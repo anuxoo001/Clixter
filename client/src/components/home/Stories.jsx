@@ -5,10 +5,10 @@ import { Dialog, DialogTitle, DialogContent, IconButton, Button } from "@mui/mat
 import CloseIcon from '@mui/icons-material/Close';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import axios from "axios";
 import { toast } from "sonner";
 import { setPosts } from "../../features/posts/postSlice";
 import { readFileAsDataURL } from "../../utils/readFileAsDataURL";
+import apiClient from "../../services/apiClient";
 
 const formatTimeAgo = (timestamp) => {
   if (!timestamp) return "";
@@ -74,13 +74,11 @@ export default function Stories() {
     }
     setUploading(true);
     try {
-      const api = import.meta.env.VITE_API_URL || '';
       const formData = new FormData();
       formData.append('media', storyFile);
       formData.append('caption', storyCaption || 'Story update');
-      const res = await axios.post(`${api}/api/post/addpost`, formData, {
+      const res = await apiClient.post(`/api/post/addpost`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        withCredentials: true,
       });
       if (res.data.success) {
         dispatch(setPosts([res.data.post, ...posts]));

@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import axios from 'axios';
 import {
   Home as HomeIcon,
   Search as SearchIcon,
@@ -29,6 +28,7 @@ import { setAuthUser } from '../../features/auth/authSlice';
 import defaultLogo from "../../assets/images/defaultlogo.png";
 import CreatePostDialog from '../../features/posts/components/CreatePostDialog';
 import { clearNotifications } from '../../features/notifications/notificationSlice';
+import apiClient from '../../services/apiClient';
 
 const SidebarItem = ({ data, Icon, label, onClick, likeNotification, followNotification }) => (
   <Tooltip title={label} arrow>
@@ -91,8 +91,7 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.post(`${api}/api/user/logout`, {}, { withCredentials: true });
+      const res = await apiClient.post(`/api/user/logout`, {});
       if (res.data.success) {
         dispatch(setAuthUser(null));
         // dispatch(clearUnSeenMessages())

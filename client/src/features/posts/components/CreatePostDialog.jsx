@@ -4,11 +4,11 @@ import { useEffect, useRef , useState } from 'react';
 import { readFileAsDataURL } from '../../../utils/readFileAsDataURL';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SaveIcon from '@mui/icons-material/Save';
-import axios from 'axios'
 import { toast } from "sonner";
 import { useDispatch, useSelector } from 'react-redux';
 import { setPosts } from '../postSlice';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../../../services/apiClient';
 
 
 
@@ -61,21 +61,20 @@ export default function CreatePostDialog({ open, handleClose }) {
       if (imagePreview) formData.append('media' , file)
       if (schedule && scheduledAt) formData.append('scheduledAt', scheduledAt)
       try {
-        const api = import.meta.env.VITE_API_URL || '';
-        const endpoint = schedule && scheduledAt ? `${api}/api/post/schedule` : `${api}/api/post/addpost`;
-        const res = await axios.post(endpoint, formData, {
+        const endpoint = schedule && scheduledAt ? `/api/post/schedule` : `/api/post/addpost`;
+        const res = await apiClient.post(endpoint, formData, {
           headers:{
             "Content-Type" : 'multipart/form-data'
-          },
-          withCredentials: true
+          }
         })
         if (res.data.success) {
           toast.success(res.data.message)
           dispatch(setPosts([res.data.post , ...posts]))
           navigate("/")
         }
-      } catch (error) {
-        console.log(error)
+} catch (error) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Failed to create post");
       } finally {
           setFile("")
           setCaption("")

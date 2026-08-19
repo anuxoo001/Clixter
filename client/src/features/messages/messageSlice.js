@@ -4,6 +4,8 @@ const initialState = {
   onlineUsers: [],
   messages: [],
   unSeenMessages: [],
+  conversations: [],
+  typing: null,
 };
 
 const messageSlice = createSlice({
@@ -28,6 +30,30 @@ const messageSlice = createSlice({
 
     setOnlineUsers: (state, action) => {
       state.onlineUsers = action.payload;
+    },
+
+    setConversations: (state, action) => {
+      state.conversations = action.payload;
+    },
+
+    setTyping: (state, action) => {
+      state.typing = action.payload;
+    },
+
+    clearTyping: (state, action) => {
+      const senderId = action.payload;
+      if (state.typing?.senderId === senderId) {
+        state.typing = null;
+      }
+    },
+
+    markMessagesSeen: (state, action) => {
+      const { chatWith } = action.payload || {};
+      if (!chatWith) return;
+
+      state.messages = state.messages.map((msg) =>
+        msg.receiverId === chatWith ? { ...msg, isSeen: true } : msg
+      );
     },
 
     addUnSeenMessages: (state, action) => {
@@ -76,6 +102,10 @@ const messageSlice = createSlice({
 export const {
   setOnlineUsers,
   setMessages,
+  setConversations,
+  setTyping,
+  clearTyping,
+  markMessagesSeen,
   addUnSeenMessages,
   removeSeenMessagesFromUser,
   clearUnSeenMessages

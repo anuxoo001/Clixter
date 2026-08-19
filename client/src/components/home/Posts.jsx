@@ -15,11 +15,11 @@ import TurnedInIcon from '@mui/icons-material/TurnedIn';
 import DetailsIcon from '@mui/icons-material/Details';
 import Avatar from "@mui/material/Avatar";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
 import { toast } from "sonner";
 import { setPosts, setSelectedPost } from "../../features/posts/postSlice";
 import CommentDialog from "../../features/comments/components/CommentDialog";
 import { addSuggestionUser, removeSuggestionUser, setAuthUser } from "../../features/auth/authSlice";
+import apiClient from "../../services/apiClient";
 
 export default function Posts({ data }) {
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ export default function Posts({ data }) {
   const dispatch = useDispatch();
   const { user } = useSelector(store => store.auth);
   const { posts } = useSelector(store => store.post);
-  const api = import.meta.env.VITE_API_URL || '';
   const [openDialog, setOpenDialog] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [postLikes, setPostLikes] = useState(data?.likes?.length || 0);
@@ -75,7 +74,7 @@ export default function Posts({ data }) {
 
   const deletePostHandler = async () => {
     try {
-      const res = await axios.delete(`${api}/api/post/delete/${data._id}`, { withCredentials: true });
+      const res = await apiClient.delete(`/api/post/delete/${data._id}`);
       if (res.data.success) {
         const updatedPosts = posts.filter((postItem) => postItem?._id !== data?._id);
         dispatch(setPosts(updatedPosts));
@@ -90,7 +89,7 @@ export default function Posts({ data }) {
 
   const likeOrDislikeHandler = async () => {
     try {
-      const res = await axios.get(`${api}/api/post/${data._id}/likeordislike`, { withCredentials: true });
+      const res = await apiClient.get(`/api/post/${data._id}/likeordislike`);
       if (res.data.success) {
         setPostLikes(res.data.liked ? postLikes + 1 : postLikes - 1);
         // update local like ids for instant UI feedback
@@ -122,10 +121,7 @@ export default function Posts({ data }) {
 
   const commentHandler = async () => {
     try {
-      const res = await axios.post(`${api}/api/post/${data?._id}/addcomment`, { commentText }, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
+      const res = await apiClient.post(`/api/post/${data?._id}/addcomment`, { commentText });
       if (res.data.success) {
         const updatedComments = [...comments, res.data.comment];
         setComments(updatedComments);
@@ -144,7 +140,7 @@ export default function Posts({ data }) {
 
   const bookmarkHandler = async () => {
     try {
-      const res = await axios.get(`${api}/api/post/${data?._id}/bookmark`, { withCredentials: true });
+      const res = await apiClient.get(`/api/post/${data?._id}/bookmark`);
       if (res.data.success) {
         const postId = data._id;
         const currentBookmarks = user?.bookmarks || [];
@@ -170,7 +166,7 @@ export default function Posts({ data }) {
       const targetUserId = data?.author?._id;
       if (!targetUserId) return;
 
-      const res = await axios.get(`${api}/api/user/${targetUserId}/followunfollow`, { withCredentials: true });
+      const res = await apiClient.get(`/api/user/${targetUserId}/followunfollow`);
       if (res.data.success) {
         const currentFollowing = user?.following || [];
         const alreadyFollowing = currentFollowing.includes(targetUserId);
@@ -364,7 +360,7 @@ export default function Posts({ data }) {
                 key={emoji}
                 onClick={async () => {
                   try {
-                    const res = await axios.post(`${api}/api/post/${data?._id}/react`, { emoji }, { withCredentials: true });
+                    const res = await apiClient.post(`/api/post/${data?._id}/react`, { emoji });
                     if (res.data.success) {
                       setPostReactions(res.data.reactions || []);
                       const updatedPosts = posts.map((post) =>

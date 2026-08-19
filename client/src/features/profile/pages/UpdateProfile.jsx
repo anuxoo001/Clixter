@@ -11,9 +11,9 @@ import {
 import { useSelector , useDispatch } from 'react-redux';
 import { readFileAsDataURL } from '../../../utils/readFileAsDataURL';
 import { toast } from "sonner";
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { setAuthUser } from '../../auth/authSlice';
+import apiClient from '../../../services/apiClient';
 
 const UpdateProfile = () => {
   const dispatch = useDispatch()
@@ -57,12 +57,10 @@ const UpdateProfile = () => {
         formDataToSend.append('profilePhoto', formData.profilePictureFile);
       }
 
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.post(`${api}/api/user/profile/edit`, formDataToSend, {
+      const res = await apiClient.post('/api/user/profile/edit', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        withCredentials: true,
       });
 
       if (res.data.success) {

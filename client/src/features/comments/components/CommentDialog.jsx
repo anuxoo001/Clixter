@@ -6,10 +6,10 @@ import {
 } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPosts } from '../../posts/postSlice';
 import { toast } from 'sonner';
+import apiClient from '../../../services/apiClient';
 
 
 
@@ -19,7 +19,6 @@ export default function CommentDialog({open , handleClose }) {
     const {user} = useSelector(store=> store.auth)
     const {selectedPost} = useSelector(store => store.post)
     const {posts} = useSelector(store => store.post) 
-    const api = import.meta.env.VITE_API_URL || '';
     const [comments, setComments] = useState([])
     const reactionEmojis = ['❤️','😂','😮','😢','👏'];
     const [commentText, setCommentText] = useState("")
@@ -33,12 +32,7 @@ export default function CommentDialog({open , handleClose }) {
     const commentHandler = async (e) => {
       e.preventDefault();
         try {
-        const res = await axios.post(`${api}/api/post/${selectedPost?._id}/addcomment`, {commentText} , {
-            headers: {
-            "Content-Type" : 'application/json'
-            },
-            withCredentials: true
-        } )
+        const res = await apiClient.post(`/api/post/${selectedPost?._id}/addcomment`, { commentText });
         if(res.data.success) {
             const updatedComments = [...comments , res.data.comment]
             setComments(updatedComments);
@@ -128,10 +122,9 @@ export default function CommentDialog({open , handleClose }) {
                                 if (!newText || !newText.trim()) return;
                                 (async () => {
                                   try {
-                                    const res = await axios.patch(
-                                      `${api}/api/post/${selectedPost?._id}/comment/${commentId}`,
-                                      { commentText: newText },
-                                      { withCredentials: true }
+                                    const res = await apiClient.patch(
+                                      `/api/post/${selectedPost?._id}/comment/${commentId}`,
+                                      { commentText: newText }
                                     );
                                     if (res.data.success) {
                                       const updatedComments = comments.map((c) =>
@@ -165,9 +158,8 @@ export default function CommentDialog({open , handleClose }) {
                                 if (!window.confirm('Delete this comment?')) return;
                                 (async () => {
                                   try {
-                                    const res = await axios.delete(
-                                      `${api}/api/post/${selectedPost?._id}/comment/${commentId}`,
-                                      { withCredentials: true }
+                                    const res = await apiClient.delete(
+                                      `/api/post/${selectedPost?._id}/comment/${commentId}`
                                     );
                                     if (res.data.success) {
                                       const updatedComments = comments.filter((c) => c._id !== commentId);
@@ -207,10 +199,9 @@ export default function CommentDialog({open , handleClose }) {
                                 onClick={async () => {
                                   if (!commentId) return;
                                   try {
-                                    const res = await axios.post(
-                                      `${api}/api/post/comment/${commentId}/react`,
-                                      { emoji },
-                                      { withCredentials: true }
+                                    const res = await apiClient.post(
+                                      `/api/post/comment/${commentId}/react`,
+                                      { emoji }
                                     );
                                     if (res.data.success) {
                                       const updatedComments = comments.map((c) =>

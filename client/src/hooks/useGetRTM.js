@@ -1,6 +1,12 @@
 import { useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addUnSeenMessages, setMessages } from "../features/messages/messageSlice";
+import {
+  addUnSeenMessages,
+  setMessages,
+  setTyping,
+  clearTyping,
+  markMessagesSeen,
+} from "../features/messages/messageSlice";
 import { setAuthUser } from "../features/auth/authSlice";
 import { getSocket } from "../features/socket/socket";
 import apiClient from "../services/apiClient";
@@ -49,12 +55,34 @@ const useGetRTM = () => {
     const socket = getSocket();
     if (!socket) return;
 
+    const onTyping = (data) => {
+      if (data?.senderId === selectedUserForChat?._id) {
+        dispatch(setTyping(data));
+      }
+    };
+
+    const onStopTyping = (data) => {
+      if (data?.senderId === selectedUserForChat?._id) {
+        dispatch(clearTyping(data.senderId));
+      }
+    };
+
+    const onMessageSeen = (data) => {
+      dispatch(markMessagesSeen({ chatWith: data?.chatWith }));
+    };
+
     socket.on("newMessage", handleNewMessage);
+    socket.on("typing", onTyping);
+    socket.on("stopTyping", onStopTyping);
+    socket.on("messageSeen", onMessageSeen);
 
     return () => {
       socket.off("newMessage", handleNewMessage);
+      socket.off("typing", onTyping);
+      socket.off("stopTyping", onStopTyping);
+      socket.off("messageSeen", onMessageSeen);
     };
-  }, [handleNewMessage]);
+  }, [handleNewMessage, selectedUserForChat, dispatch]);
 };
 
 export default useGetRTM;

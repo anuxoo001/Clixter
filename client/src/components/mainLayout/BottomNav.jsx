@@ -9,10 +9,10 @@ import {
   AccountCircle as AccountCircleIcon,
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
 import { toast } from 'sonner';
 import { setAuthUser } from '../../features/auth/authSlice';
 import CreatePostDialog from '../../features/posts/components/CreatePostDialog';
+import apiClient from '../../services/apiClient';
 
 const NavItem = ({ active, onClick, children, label }) => (
   <button
@@ -48,8 +48,7 @@ const BottomNav = () => {
   const handleLogout = async () => {
     handleProfileMenuClose();
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.post(`${api}/api/user/logout`, {}, { withCredentials: true });
+      const res = await apiClient.post(`/api/user/logout`, {});
       if (res.data.success) {
         dispatch(setAuthUser(null));
         toast.success(res.data.message);

@@ -14,9 +14,9 @@ import {
   Button,
   ListItemText,
 } from '@mui/material';
-import axios from 'axios';
 import { addSuggestionUser, removeSuggestionUser, setAuthUser, setSelestedUserForChat } from '../../auth/authSlice';
 import { toast } from 'sonner';
+import apiClient from '../../../services/apiClient';
 
 const ProfileHeader = () => {
   const dispatch = useDispatch()
@@ -47,8 +47,7 @@ const ProfileHeader = () => {
 
   const addToInboxHandler = async (userId) => {
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.get(`${api}/api/user/${userId}/addtomessageinbox`, { withCredentials: true })
+      const res = await apiClient.get(`/api/user/${userId}/addtomessageinbox`)
       if (res.data.success) {
         const { addedUser } = res.data;
         const alreadyExists = user.messageInbox?.some(
@@ -71,8 +70,7 @@ const ProfileHeader = () => {
 
   const followUnfollowHandler = async (userProfile) => {
     try {
-      const api = import.meta.env.VITE_API_URL || '';
-      const res = await axios.get(`${api}/api/user/${userProfile?._id}/followunfollow`, { withCredentials: true });
+      const res = await apiClient.get(`/api/user/${userProfile?._id}/followunfollow`);
       if (res.data.success) {
         const targetUserId = userProfile?._id
         const currentFollowing = user?.following || [];

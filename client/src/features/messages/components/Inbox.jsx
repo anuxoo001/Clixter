@@ -7,11 +7,10 @@ import Badge from '@mui/material/Badge';
 import apiClient from '../../../services/apiClient';
 import defaultLogo from '../../../assets/images/defaultlogo.png';
 import { setAuthUser, setSelestedUserForChat } from '../../auth/authSlice';
-import { removeSeenMessagesFromUser } from '../messageSlice';
+import { setConversations, removeSeenMessagesFromUser } from '../messageSlice';
 import useGetRTM from '../../../hooks/useGetRTM';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
-
   '& .MuiBadge-badge': {
     backgroundColor: '#44b700',
     color: '#44b700',
@@ -34,6 +33,25 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
+const formatPreviewTime = (timestamp) => {
+  if (!timestamp) return '';
+  const d = new Date(timestamp);
+  const now = new Date();
+  const sameDay =
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate();
+
+  if (sameDay) {
+    let h = d.getHours();
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m} ${ampm}`;
+  }
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+};
+
 const Inbox = () => {
   useGetRTM();
 
@@ -43,10 +61,25 @@ const Inbox = () => {
   const selectedUserForChat = params.id;
 
   const { user } = useSelector((store) => store.auth);
-  const { onlineUsers, unSeenMessages } = useSelector((store) => store.message);
+  const { onlineUsers, unSeenMessages, conversations } = useSelector((store) => store.message);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+
+  const fetchConversations = useCallback(async () => {
+    try {
+      const res = await apiClient.get('/api/message/conversations');
+      if (res.data.success) {
+        dispatch(setConversations(res.data.conversations || []));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations, unSeenMessages]);
 
   const handleSearch = async (e) => {
     const value = e.target.value;
@@ -62,19 +95,13 @@ const Inbox = () => {
 
       if (res.data.success) {
         const filteredUsers = (res.data.users || []).filter(
-          (u) => u._id !== user.id 
+          (u) => u._id !== user.id
         );
         setSearchResults(filteredUsers);
       }
     } catch (err) {
       console.error('Search error:', err);
     }
-  };
-
-  const getUnseenCount = (userId) => {
-    return unSeenMessages?.filter(
-      (msg) => msg?.senderId === userId && msg?.receiverId === user.id && !msg?.isSeen
-    ).length;
   };
 
   const markSeenHandler = useCallback(async (receiverId) => {
@@ -113,151 +140,115 @@ const Inbox = () => {
           const updatedUser = {
             ...user,
             messageInbox: [...(user.messageInbox || []), addedUser],
-          }
-          dispatch(setAuthUser(updatedUser))
+          };
+          dispatch(setAuthUser(updatedUser));
         }
-        // navigate(`/inbox/${addedUser._id}/chat`)
-        dispatch(setSelestedUserForChat(addedUser))
+        dispatch(setSelestedUserForChat(addedUser));
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
+
+  const openChat = (partner) => {
+    dispatch(setSelestedUserForChat(partner));
+    navigate(`${partner._id}/chat`);
+    markSeenHandler(partner._id);
+  };
+
+  const renderItem = (conv, isSearchResult = false) => {
+    const userItem = conv?.user || conv;
+    const unseenCount = isSearchResult ? 0 : conv?.unreadCount || 0;
+    const isOnline = onlineUsers.includes(userItem?._id);
+    const isSelected = selectedUserForChat === userItem._id;
+
+    return (
+      <div
+        key={userItem._id}
+        onClick={() => {
+          if (isSearchResult) {
+            addToInboxHandler(userItem?._id);
+            setSearchResults([]);
+            setSearchTerm('');
+          }
+          openChat(userItem);
+        }}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
+          isSelected ? 'bg-slate-200/70 dark:bg-slate-800/70' : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/40'
+        }`}
+      >
+        <div className="relative flex-shrink-0">
+          {isOnline ? (
+            <StyledBadge overlap="circular" anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} variant="dot">
+              <img
+                src={userItem.profilePicture?.link || defaultLogo}
+                className="w-12 h-12 rounded-full object-cover"
+                alt="profile"
+              />
+            </StyledBadge>
+          ) : (
+            <img
+              src={userItem.profilePicture?.link || defaultLogo}
+              className="w-12 h-12 rounded-full object-cover"
+              alt="profile"
+            />
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-semibold text-sm truncate">{userItem.userName}</p>
+            <span className="text-[10px] text-slate-400 flex-shrink-0">
+              {conv?.lastMessageAt ? formatPreviewTime(conv.lastMessageAt) : ''}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <p className={`text-xs truncate ${unseenCount > 0 ? 'font-medium text-slate-900 dark:text-slate-100' : 'text-slate-400'}`}>
+              {isSearchResult
+                ? userItem.fullName || 'User'
+                : conv?.lastMessage
+                ? conv.lastMessage.message
+                : isOnline
+                ? 'Active now'
+                : 'Offline'}
+            </p>
+            {unseenCount > 0 && (
+              <span className="flex-shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">
+                {unseenCount > 9 ? '9+' : unseenCount}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="bg-white text-black border-r border-gray-200 h-screen flex flex-col dark:bg-slate-950 dark:text-slate-100 dark:border-slate-800">
-      <div className="p-4 font-bold text-xl border-gray-700 dark:border-slate-800">{user?.userName}</div>
-
-
-      <div className="flex justify-around text-sm mt-2 border-b border-gray-200 dark:border-slate-800">
-        <p className="py-2 text-gray-400 dark:text-slate-300">Inbox</p>
+    <div className="bg-white text-black border-r border-gray-200 h-full flex flex-col dark:bg-slate-950 dark:text-slate-100 dark:border-slate-800">
+      <div className="p-4 font-bold text-xl border-b border-slate-200 dark:border-slate-800">
+        Messages
       </div>
 
-
-      <div className="px-4 py-2">
+      <div className="px-4 py-3">
         <input
           value={searchTerm}
           onChange={handleSearch}
-          className="w-full bg-gray-200 rounded px-3 py-1 text-sm dark:bg-slate-900 dark:text-slate-100" 
-
-          placeholder="Search"
+          className="w-full bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-2 text-sm outline-none dark:text-slate-100"
+          placeholder="Search people"
         />
       </div>
 
-      <div className="flex flex-col px-2 overflow-y-auto">
-        {[...(user?.messageInbox || [])]
-          ?.sort((a, b) => getUnseenCount(b._id) - getUnseenCount(a._id))
-          .map((userItem) => {
-            const isOnline = onlineUsers.includes(userItem?._id);
-            const isSelected = selectedUserForChat === userItem._id;
-            const unseenCount = getUnseenCount(userItem._id);
-
-            return (
-              <div
-                key={userItem._id}
-                onClick={() => {
-                  dispatch(setSelestedUserForChat(userItem));
-                  navigate(`${userItem._id}/chat`);
-                  markSeenHandler(userItem._id);
-                }}
-                className={`flex items-center gap-3 px-3 py-2 rounded cursor-pointer 
-                  ${isSelected ? 'bg-gray-300/50' : 'hover:bg-gray-100/50'}`}
-              >
-                <div className="relative">
-                  {isOnline ? (
-                    <StyledBadge
-                      overlap="circular"
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      variant="dot"
-                    >
-                      <img
-                        src={userItem.profilePicture?.link || defaultLogo}
-                        className="w-10 h-10 rounded-full"
-                        alt="profile"
-                      />
-                    </StyledBadge>
-                  ) : (
-                    <img
-                      src={userItem.profilePicture?.link || defaultLogo}
-                      className="w-10 h-10 rounded-full"
-                      alt="profile"
-                    />
-                  )}
-                </div>
-
-                <div className="flex-1">
-                  <div className="flex justify-between items-center">
-                    <p className="font-medium text-sm">
-                      {userItem.userName} <span className="text-blue-500">✔</span>
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <p
-                      className={`text-[11px] font-medium opacity-[.8] ${
-                        isOnline ? 'text-green-500' : 'text-red-500'
-                      }`}
-                    >
-                      {isOnline ? 'online' : 'offline'}
-                    </p>
-                    {unseenCount > 0 && selectedUserForChat !== userItem._id && (
-                      <p className="text-[10px] text-blue-600 font-semibold ml-2">
-                        • {unseenCount > 9 ? '9+' : unseenCount} new message
-                        {unseenCount > 1 ? 's' : ''}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-        {searchResults.length > 0 && (
-          <div className="mt-4 border-t border-gray-200 pt-2">
-            <p className="text-xs text-gray-500 mb-2">Search Results</p>
-            {searchResults.map((userItem) => {
-              const isOnline = onlineUsers.includes(userItem?._id);
-
-              return (
-                <div
-                  key={`search-${userItem._id}`}
-                  onClick={() => {
-                    addToInboxHandler(userItem?._id)
-                    dispatch(setSelestedUserForChat(userItem));
-                    navigate(`${userItem._id}/chat`);
-                    markSeenHandler(userItem._id);
-                    setSearchResults([]);
-                    setSearchTerm('');
-                  }}
-                  className="flex items-center gap-3 px-3 py-2 rounded cursor-pointer hover:bg-gray-100/50"
-                >
-                  <div className="relative">
-                    {isOnline ? (
-                      <StyledBadge
-                        overlap="circular"
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        variant="dot"
-                      >
-                        <img
-                          src={userItem.profilePicture?.link || defaultLogo}
-                          className="w-10 h-10 rounded-full"
-                          alt="profile"
-                        />
-                      </StyledBadge>
-                    ) : (
-                      <img
-                        src={userItem.profilePicture?.link || defaultLogo}
-                        className="w-10 h-10 rounded-full"
-                        alt="profile"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{userItem.userName}</p>
-                    <p className="text-[11px] text-gray-500">{userItem.fullName}</p>
-                  </div>
-                </div>
-              );
-            })}
+      <div className="flex-1 overflow-y-auto px-2 pb-4">
+        {searchResults.length > 0 ? (
+          <>
+            <p className="text-xs text-slate-400 px-3 py-2">Search Results</p>
+            {searchResults.map((u) => renderItem(u, true))}
+          </>
+        ) : conversations.length > 0 ? (
+          conversations.map((conv) => renderItem(conv, false))
+        ) : (
+          <div className="text-center text-sm text-slate-400 py-10 px-4">
+            No conversations yet. Search for people to start chatting.
           </div>
         )}
       </div>
