@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Badge } from '@mui/material';
+import { Badge, Menu, MenuItem } from '@mui/material';
 import {
   Home as HomeIcon,
   Search as SearchIcon,
@@ -8,7 +8,10 @@ import {
   AddBox as AddBoxIcon,
   AccountCircle as AccountCircleIcon,
 } from '@mui/icons-material';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { setAuthUser } from '../../features/auth/authSlice';
 import CreatePostDialog from '../../features/posts/components/CreatePostDialog';
 
 const NavItem = ({ active, onClick, children, label }) => (
@@ -25,10 +28,12 @@ const NavItem = ({ active, onClick, children, label }) => (
 
 const BottomNav = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { pathname } = useLocation();
   const { user } = useSelector((store) => store.auth);
   const { unSeenMessages } = useSelector((store) => store.message);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [profileAnchor, setProfileAnchor] = useState(null);
 
   const unseenUserCount = new Set(
     (unSeenMessages || [])
@@ -37,6 +42,23 @@ const BottomNav = () => {
   ).size;
 
   const isActive = (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`);
+
+  const handleProfileMenuClose = () => setProfileAnchor(null);
+
+  const handleLogout = async () => {
+    handleProfileMenuClose();
+    try {
+      const api = import.meta.env.VITE_API_URL || '';
+      const res = await axios.post(`${api}/api/user/logout`, {}, { withCredentials: true });
+      if (res.data.success) {
+        dispatch(setAuthUser(null));
+        toast.success(res.data.message);
+        navigate('/auth-login', { replace: true });
+      }
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+    }
+  };
 
   return (
     <>
@@ -62,13 +84,31 @@ const BottomNav = () => {
 
           <NavItem
             active={isActive(`/${user?.id}/profile`)}
-            onClick={() => navigate(`/${user?.id}/profile`)}
+            onClick={(e) => setProfileAnchor(e.currentTarget)}
             label="Profile"
           >
             <AccountCircleIcon className="text-[26px]" />
           </NavItem>
         </div>
       </nav>
+
+      <Menu
+        anchorEl={profileAnchor}
+        open={Boolean(profileAnchor)}
+        onClose={handleProfileMenuClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <MenuItem
+          onClick={() => {
+            handleProfileMenuClose();
+            navigate(`/${user?.id}/profile`);
+          }}
+        >
+          Open Profile
+        </MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      </Menu>
 
       <CreatePostDialog
         open={openCreateDialog}
