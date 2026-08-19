@@ -225,6 +225,22 @@ export const addCommentOnPost = async (req, res) => {
         post.comments.push(comment._id)
         await post.save()
 
+        const commenter = await User.findById(authorId).select('userName profilePicture');
+        const postOwnerId = post.author.toString();
+        if (postOwnerId !== authorId) {
+            const notification = {
+                type: 'comment',
+                userId: authorId,
+                userDetails: commenter,
+                postId,
+                message: 'Commented on your post.',
+            };
+            const postOwnerSocketId = getSocketId(postOwnerId);
+            if (postOwnerSocketId) {
+                io.to(postOwnerSocketId).emit('commentNotification', notification);
+            }
+        }
+
         return res.status(201).json({success: true, comment , message: 'Comment Successfully.'})
     } catch (error) {
         return res.status(400).json({ success: false, message: error.message });

@@ -24,7 +24,7 @@ import { setAuthUser } from '../../features/auth/authSlice';
 import CreatePostDialog from '../../features/posts/components/CreatePostDialog';
 import apiClient from '../../services/apiClient';
 
-const SidebarItem = ({ data, Icon, label, onClick, likeNotification, followNotification }) => (
+const SidebarItem = ({ data, Icon, label, onClick, likeNotification, followNotification, commentNotification }) => (
   <Tooltip title={label} arrow>
     <div
       onClick={onClick}
@@ -47,7 +47,7 @@ const SidebarItem = ({ data, Icon, label, onClick, likeNotification, followNotif
           )}
         </div>
       ) : label === 'Notifications' ? (
-        <Badge badgeContent={likeNotification?.length + followNotification?.length || 0} color="secondary">
+        <Badge badgeContent={(likeNotification?.length || 0) + (followNotification?.length || 0) + (commentNotification?.length || 0)} color="secondary">
           <NotificationsIcon className="text-slate-100" />
         </Badge>
       ) : (
@@ -62,7 +62,7 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector(store => store.auth);
-  const { likeNotification, followNotification } = useSelector(store => store.realTimeNotification);
+  const { likeNotification, followNotification, commentNotification } = useSelector(store => store.realTimeNotification);
   const { unSeenMessages } = useSelector(store => store.message);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -125,6 +125,7 @@ const Sidebar = () => {
               label='Notifications'
               likeNotification={likeNotification}
               followNotification={followNotification}
+              commentNotification={commentNotification}
               onClick={() => navigate('/notifications')}
             />
             <SidebarItem Icon={AddBoxIcon} label='Create' onClick={() => setOpenCreateDialog(true)} />

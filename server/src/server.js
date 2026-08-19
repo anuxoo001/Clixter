@@ -8,6 +8,7 @@ import messageRoute from './routes/message.route.js'
 import postRoute from './routes/post.route.js'
 import userRoute from './routes/user.route.js';
 import reactionRoute from './routes/reaction.route.js'
+import highlightRoute from './routes/highlight.route.js'
 import { app, server } from "./config/socket.js";
 import startPublishScheduler from './cron/publishScheduled.js';
 
@@ -59,6 +60,7 @@ app.use('/api/message', messageRoute);
 app.use('/api/post', postRoute);
 app.use('/api/user', userRoute);
 app.use('/api/reaction', reactionRoute);
+app.use('/api/highlight', highlightRoute);
 
 // Global error handler
 app.use(errorHandler);

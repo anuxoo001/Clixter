@@ -7,6 +7,7 @@ import { setOnlineUsers } from "./features/messages/messageSlice";
 import {
   setFollowNotification,
   setLikeNotification,
+  setCommentNotification,
 } from "./features/notifications/notificationSlice";
 
 import { connectSocket, disconnectSocket } from "./features/socket/socket";
@@ -65,6 +66,10 @@ const App = () => {
 
       socketIo.on("followNotification", (data) => {
         dispatch(setFollowNotification(data));
+      });
+
+      socketIo.on("commentNotification", (data) => {
+        dispatch(setCommentNotification(data));
       });
     } catch (err) {
       console.log("Socket error:", err);

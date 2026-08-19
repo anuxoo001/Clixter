@@ -17,6 +17,7 @@ import { setAuthUser } from "../../auth/authSlice";
 import apiClient from "../../../services/apiClient";
 import CommentDialog from "../../comments/components/CommentDialog";
 import LikesDialog from "../components/LikesDialog";
+import RecordReelDialog from "../components/RecordReelDialog";
 import { isVideoUrl } from "../../../utils/media";
 import Linkify from "../../../components/common/Linkify";
 
@@ -236,6 +237,7 @@ export default function Reels() {
   const { posts } = useSelector((store) => store.post);
   const [selectedPost, setSelectedPost] = useState(null);
   const [commentOpen, setCommentOpen] = useState(false);
+  const [recordOpen, setRecordOpen] = useState(false);
 
   const reels = posts.filter((post) => post?.media && isVideoUrl(post.media));
 
@@ -243,7 +245,15 @@ export default function Reels() {
     <div className="h-full flex flex-col bg-slate-950">
       <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
         <h1 className="text-xl font-bold text-white">Reels</h1>
-        <span className="text-xs text-white/60">{reels.length} videos</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-white/60">{reels.length} videos</span>
+          <button
+            onClick={() => setRecordOpen(true)}
+            className="rounded-full bg-gradient-to-r from-sky-500 to-fuchsia-500 text-white text-sm font-semibold px-4 py-1.5 shadow-lg shadow-sky-500/20"
+          >
+            Record
+          </button>
+        </div>
       </div>
 
       {reels.length === 0 ? (
@@ -277,6 +287,11 @@ export default function Reels() {
           handleClose={() => setCommentOpen(false)}
         />
       )}
+
+      <RecordReelDialog
+        open={recordOpen}
+        handleClose={() => setRecordOpen(false)}
+      />
     </div>
   );
 }

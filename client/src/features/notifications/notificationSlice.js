@@ -4,7 +4,8 @@ const notificationSlice = createSlice({
     name: 'realTimeNotification',
     initialState:{
         likeNotification: [],
-        followNotification: []
+        followNotification: [],
+        commentNotification: []
     },
     reducers:{
         setLikeNotification:(state, action) =>{
@@ -21,12 +22,18 @@ const notificationSlice = createSlice({
                 state.followNotification = state.followNotification.filter((notification) => notification.userId !== action.payload.userId)
             }
         },
+        setCommentNotification:(state, action) => {
+            if(action.payload.type === 'comment'){
+                state.commentNotification.push(action.payload)
+            }
+        },
         clearNotifications: (state) => {
             state.likeNotification = [];
             state.followNotification = [];
+            state.commentNotification = [];
         },
     }
 })
-export const {setLikeNotification, setFollowNotification, clearNotifications} = notificationSlice.actions;
+export const {setLikeNotification, setFollowNotification, setCommentNotification, clearNotifications} = notificationSlice.actions;
 export default notificationSlice.reducer;
 
