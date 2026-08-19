@@ -17,6 +17,7 @@ import { setAuthUser } from "../../auth/authSlice";
 import apiClient from "../../../services/apiClient";
 import CommentDialog from "../../comments/components/CommentDialog";
 import { isVideoUrl } from "../../../utils/media";
+import Linkify from "../../../components/common/Linkify";
 
 const formatTimeAgo = (timestamp) => {
   if (!timestamp) return "";
@@ -162,7 +163,9 @@ const ReelItem = ({ data, onComment }) => {
           <span className="text-xs text-white/60">{formatTimeAgo(data.createdAt)}</span>
         </div>
         {data.caption && (
-          <p className="mt-1 text-sm text-white/90 line-clamp-2">{data.caption}</p>
+          <p className="mt-1 text-sm text-white/90 line-clamp-2">
+            <Linkify text={data.caption} />
+          </p>
         )}
       </div>
 

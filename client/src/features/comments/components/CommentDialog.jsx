@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setPosts } from '../../posts/postSlice';
 import { toast } from 'sonner';
 import apiClient from '../../../services/apiClient';
+import Linkify from '../../../components/common/Linkify';
 
 
 
@@ -110,7 +111,7 @@ export default function CommentDialog({open , handleClose }) {
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold">{comment.author?.userName} .</p>
                         </div>
-                        <p className="text-sm ml-1">{comment.text}</p>
+                        <p className="text-sm ml-1"><Linkify text={comment.text} /></p>
 
                         {isMyComment && (
                           <div className="mt-2 flex items-center gap-2">

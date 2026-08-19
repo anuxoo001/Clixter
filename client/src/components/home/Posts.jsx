@@ -22,6 +22,7 @@ import CommentDialog from "../../features/comments/components/CommentDialog";
 import { addSuggestionUser, removeSuggestionUser, setAuthUser } from "../../features/auth/authSlice";
 import apiClient from "../../services/apiClient";
 import { isVideoUrl } from "../../utils/media";
+import Linkify from "../common/Linkify";
 
 export default function Posts({ data }) {
   const navigate = useNavigate();
@@ -408,9 +409,10 @@ export default function Posts({ data }) {
         {data?.caption && (
           <p className="text-sm mt-1">
             <span className="font-semibold mr-1">{data.author.userName}</span>
-            <span className={showFullCaption ? "" : "line-clamp-2"}>
-              {data.caption}
-            </span>
+            <Linkify
+              text={data.caption}
+              className={showFullCaption ? "" : "line-clamp-2"}
+            />
             {data.caption.length > 80 && (
               <button
                 onClick={() => setShowFullCaption((s) => !s)}

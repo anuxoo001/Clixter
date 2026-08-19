@@ -14,6 +14,7 @@ import { setPosts } from "../../features/posts/postSlice";
 import { readFileAsDataURL } from "../../utils/readFileAsDataURL";
 import apiClient from "../../services/apiClient";
 import { isVideoUrl } from "../../utils/media";
+import Linkify from "../common/Linkify";
 
 const STORY_DURATION = 5000;
 const TICK_MS = 50;
@@ -292,7 +293,7 @@ export default function Stories() {
             {/* Caption */}
             {activeStory.caption && (
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
-                <p className="text-sm">{activeStory.caption}</p>
+                <Linkify text={activeStory.caption} />
               </div>
             )}
 
