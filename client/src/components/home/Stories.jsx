@@ -1,14 +1,22 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import defaultLogo from "../../assets/images/defaultlogo.png";
 import { Dialog, DialogTitle, DialogContent, IconButton, Button } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { toast } from "sonner";
 import { setPosts } from "../../features/posts/postSlice";
 import { readFileAsDataURL } from "../../utils/readFileAsDataURL";
 import apiClient from "../../services/apiClient";
+import { isVideoUrl } from "../../utils/media";
+
+const STORY_DURATION = 5000;
+const TICK_MS = 50;
 
 const formatTimeAgo = (timestamp) => {
   if (!timestamp) return "";
@@ -27,13 +35,16 @@ const formatTimeAgo = (timestamp) => {
 export default function Stories() {
   const dispatch = useDispatch();
   const { posts } = useSelector((store) => store.post);
-  const [activeStory, setActiveStory] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [storyFile, setStoryFile] = useState(null);
   const [storyPreview, setStoryPreview] = useState("");
   const [storyCaption, setStoryCaption] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const timerRef = useRef(null);
 
   const stories = useMemo(() => {
     const map = {};
@@ -52,6 +63,54 @@ export default function Stories() {
     });
     return Object.values(map).slice(0, 12);
   }, [posts]);
+
+  const activeStory = activeIndex !== null ? stories[activeIndex] : null;
+
+  const closeViewer = useCallback(() => {
+    setActiveIndex(null);
+    setProgress(0);
+    setPaused(false);
+  }, []);
+
+  const next = useCallback(() => {
+    if (activeIndex === null) return;
+    if (activeIndex < stories.length - 1) {
+      setActiveIndex((i) => i + 1);
+      setProgress(0);
+    } else {
+      closeViewer();
+    }
+  }, [activeIndex, stories.length, closeViewer]);
+
+  const prev = useCallback(() => {
+    if (activeIndex === null) return;
+    if (activeIndex > 0) {
+      setActiveIndex((i) => i - 1);
+      setProgress(0);
+    }
+  }, [activeIndex]);
+
+  useEffect(() => {
+    if (activeIndex === null || paused) return;
+
+    timerRef.current = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 100) {
+          clearInterval(timerRef.current);
+          return p;
+        }
+        return p + (TICK_MS / STORY_DURATION) * 100;
+      });
+    }, TICK_MS);
+
+    return () => clearInterval(timerRef.current);
+  }, [activeIndex, paused, next]);
+
+  useEffect(() => {
+    if (progress >= 100 && activeIndex !== null) {
+      next();
+    }
+  }, [progress, activeIndex, next]);
 
   const handleFileChange = async (event) => {
     const file = event.target.files?.[0];
@@ -135,7 +194,10 @@ export default function Stories() {
           stories.map((story, index) => (
             <button
               key={story.author._id || index}
-              onClick={() => setActiveStory(story)}
+              onClick={() => {
+                setActiveIndex(index);
+                setProgress(0);
+              }}
               className="group flex flex-col items-center min-w-[80px]"
               type="button"
             >
@@ -157,40 +219,107 @@ export default function Stories() {
         )}
       </div>
 
-      <Dialog open={Boolean(activeStory)} onClose={() => setActiveStory(null)} maxWidth="md" fullWidth>
-        <DialogTitle className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden">
-              <img
-                src={activeStory?.author?.profilePicture?.link || defaultLogo}
-                alt={activeStory?.author?.userName}
-                className="w-full h-full object-cover"
-              />
+      {/* Story viewer */}
+      <Dialog
+        open={activeIndex !== null}
+        onClose={closeViewer}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { backgroundColor: 'transparent', boxShadow: 'none', overflow: 'visible' } }}
+      >
+        {activeStory && (
+          <div
+            className="relative bg-black rounded-2xl overflow-hidden"
+            onPointerDown={() => setPaused(true)}
+            onPointerUp={() => setPaused(false)}
+            onPointerLeave={() => setPaused(false)}
+          >
+            {/* Progress segments */}
+            <div className="absolute top-2 left-2 right-2 z-10 flex gap-1">
+              {stories.map((_, i) => (
+                <div key={i} className="h-1 flex-1 rounded-full bg-white/30 overflow-hidden">
+                  <div
+                    className="h-full bg-white rounded-full transition-all duration-100"
+                    style={{
+                      width: i < activeIndex ? '100%' : i === activeIndex ? `${progress}%` : '0%',
+                    }}
+                  />
+                </div>
+              ))}
             </div>
-            <div>
-              <p className="font-semibold text-black">{activeStory?.author?.userName}</p>
-              <p className="text-xs text-gray-500">{formatTimeAgo(activeStory?.createdAt)}</p>
-            </div>
-          </div>
-          <IconButton onClick={() => setActiveStory(null)}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent className="p-0">
-          {activeStory && (
-            <div className="relative bg-black">
-              <img
-                src={activeStory.media}
-                alt={activeStory.author.userName}
-                className="w-full max-h-[70vh] object-contain"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-4 text-white">
-                <p className="text-sm font-semibold">{activeStory.author.userName}'s story</p>
-                {activeStory.caption && <p className="mt-1 text-xs text-gray-200">{activeStory.caption}</p>}
+
+            {/* Header */}
+            <div className="absolute top-5 left-3 right-3 z-10 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-sky-500">
+                <img
+                  src={activeStory.author.profilePicture?.link || defaultLogo}
+                  alt={activeStory.author.userName}
+                  className="w-full h-full object-cover"
+                />
               </div>
+              <div className="flex-1">
+                <p className="font-semibold text-white text-sm">{activeStory.author.userName}</p>
+                <p className="text-xs text-white/70">{formatTimeAgo(activeStory.createdAt)}</p>
+              </div>
+              <IconButton onClick={closeViewer} sx={{ color: 'white' }}>
+                <CloseIcon />
+              </IconButton>
             </div>
-          )}
-        </DialogContent>
+
+            {/* Media */}
+            <div className="flex items-center justify-center h-[70vh]">
+              {isVideoUrl(activeStory.media) ? (
+                <video
+                  src={activeStory.media}
+                  autoPlay
+                  controls={false}
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <img
+                  src={activeStory.media}
+                  alt={activeStory.author.userName}
+                  className="w-full h-full object-contain"
+                />
+              )}
+            </div>
+
+            {/* Caption */}
+            {activeStory.caption && (
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
+                <p className="text-sm">{activeStory.caption}</p>
+              </div>
+            )}
+
+            {/* Tap zones */}
+            <div className="absolute inset-0 flex z-10">
+              <button type="button" className="flex-1" onClick={prev} aria-label="Previous story" />
+              <div className="w-16 flex items-center justify-center">
+                <IconButton onClick={() => setPaused((p) => !p)} sx={{ color: 'white' }} size="small">
+                  {paused ? <PlayArrowIcon /> : <PauseIcon />}
+                </IconButton>
+              </div>
+              <button type="button" className="flex-1" onClick={next} aria-label="Next story" />
+            </div>
+
+            {/* Arrows */}
+            <IconButton
+              onClick={prev}
+              sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'white', zIndex: 20 }}
+            >
+              <ChevronLeftIcon />
+            </IconButton>
+            <IconButton
+              onClick={next}
+              sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', color: 'white', zIndex: 20 }}
+            >
+              <ChevronRightIcon />
+            </IconButton>
+          </div>
+        )}
       </Dialog>
 
       <Dialog open={uploadOpen} onClose={() => { setUploadOpen(false); resetUploadForm(); }} fullWidth maxWidth="sm">

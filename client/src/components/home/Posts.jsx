@@ -13,6 +13,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import TurnedInNotIcon from '@mui/icons-material/TurnedInNot';
 import TurnedInIcon from '@mui/icons-material/TurnedIn';
 import DetailsIcon from '@mui/icons-material/Details';
+import ShareIcon from '@mui/icons-material/Share';
 import Avatar from "@mui/material/Avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -20,6 +21,7 @@ import { setPosts, setSelectedPost } from "../../features/posts/postSlice";
 import CommentDialog from "../../features/comments/components/CommentDialog";
 import { addSuggestionUser, removeSuggestionUser, setAuthUser } from "../../features/auth/authSlice";
 import apiClient from "../../services/apiClient";
+import { isVideoUrl } from "../../utils/media";
 
 export default function Posts({ data }) {
   const navigate = useNavigate();
@@ -29,12 +31,15 @@ export default function Posts({ data }) {
   const { posts } = useSelector(store => store.post);
   const [openDialog, setOpenDialog] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [postLikes, setPostLikes] = useState(data?.likes?.length || 0);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState(data?.comments || []);
   const [showHeart, setShowHeart] = useState(false);
   const [postReactions, setPostReactions] = useState(data?.reactions || []);
   const [postLikeIds, setPostLikeIds] = useState(data?.likes || []);
+  const [showFullCaption, setShowFullCaption] = useState(false);
+  const [videoMuted, setVideoMuted] = useState(true);
 
   useEffect(() => {
     if (data) {
@@ -199,6 +204,35 @@ export default function Posts({ data }) {
     setTimeout(() => setShowHeart(false), 1200);
   };
 
+  const copyPostLink = async () => {
+    try {
+      const url = `${window.location.origin}/#/post/${data?._id}`;
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard");
+      setShareDialogOpen(false);
+    } catch (error) {
+      toast.error("Failed to copy link");
+    }
+  };
+
+  const shareLinks = [
+    {
+      label: "WhatsApp",
+      url: `https://wa.me/?text=${encodeURIComponent(data?.caption || "Check this post")} ${encodeURIComponent(window.location.href)}`,
+      bg: "bg-green-500",
+    },
+    {
+      label: "Facebook",
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
+      bg: "bg-blue-600",
+    },
+    {
+      label: "X (Twitter)",
+      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(data?.caption || "Check this post")}&url=${encodeURIComponent(window.location.href)}`,
+      bg: "bg-slate-900",
+    },
+  ];
+
   const isAuthor = user?.id === data?.author?._id;
 
   const visibleOptions = [
@@ -280,14 +314,36 @@ export default function Posts({ data }) {
       </div>
 
       <div
-        className="w-full h-[500px] rounded-md overflow-hidden relative group"
+        className="w-full h-[500px] rounded-md overflow-hidden relative group bg-black"
         onDoubleClick={handleDoubleClick}
       >
-        <img
-          src={data.media}
-          alt="post_media"
-          className="w-full h-full object-contain"
-        />
+        {isVideoUrl(data.media) ? (
+          <video
+            src={data.media}
+            controls
+            loop
+            muted={videoMuted}
+            playsInline
+            className="w-full h-full object-contain"
+          >
+            Your browser does not support video playback.
+          </video>
+        ) : (
+          <img
+            src={data.media}
+            alt="post_media"
+            className="w-full h-full object-contain"
+          />
+        )}
+        {isVideoUrl(data.media) && (
+          <button
+            onClick={() => setVideoMuted((m) => !m)}
+            className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/60 text-white text-xs flex items-center justify-center"
+            aria-label="Toggle sound"
+          >
+            {videoMuted ? "🔇" : "🔊"}
+          </button>
+        )}
         {showHeart && (
           <FavoriteIcon
             sx={{
@@ -336,6 +392,11 @@ export default function Posts({ data }) {
               sx={{ fontSize: "27px" }}
               className="cursor-pointer text-slate-100"
             />
+            <ShareIcon
+              onClick={() => setShareDialogOpen(true)}
+              sx={{ fontSize: "26px" }}
+              className="cursor-pointer text-slate-100"
+            />
           </div>
           {user?.bookmarks?.includes(data?._id)
             ? <TurnedInIcon onClick={bookmarkHandler} sx={{ fontSize: "30px", cursor: 'pointer' }} className="text-slate-100" />
@@ -343,6 +404,23 @@ export default function Posts({ data }) {
         </div>
 
         <p className="text-sm font-semibold">{postLikes} likes</p>
+
+        {data?.caption && (
+          <p className="text-sm mt-1">
+            <span className="font-semibold mr-1">{data.author.userName}</span>
+            <span className={showFullCaption ? "" : "line-clamp-2"}>
+              {data.caption}
+            </span>
+            {data.caption.length > 80 && (
+              <button
+                onClick={() => setShowFullCaption((s) => !s)}
+                className="text-slate-400 text-xs ml-1 hover:underline"
+              >
+                {showFullCaption ? "less" : "more"}
+              </button>
+            )}
+          </p>
+        )}
 
         {/* Emoji reactions */}
         <div className="mt-2 flex items-center gap-2">
@@ -409,6 +487,31 @@ export default function Posts({ data }) {
         open={commentDialogOpen}
         handleClose={() => setCommentDialogOpen(false)}
       />
+
+      <Dialog fullWidth maxWidth="xs" open={shareDialogOpen} onClose={() => setShareDialogOpen(false)}>
+        <DialogContent>
+          <p className="text-center font-semibold mb-3">Share post</p>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={copyPostLink}
+              className="w-full py-3 text-sm font-semibold text-white bg-slate-900 dark:bg-slate-700 rounded-xl hover:opacity-90"
+            >
+              Copy link
+            </button>
+            {shareLinks.map((s) => (
+              <a
+                key={s.label}
+                href={s.url}
+                target="_blank"
+                rel="noreferrer"
+                className={`w-full py-3 text-center text-sm font-semibold text-white ${s.bg} rounded-xl hover:opacity-90`}
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
