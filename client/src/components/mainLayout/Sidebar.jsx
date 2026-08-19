@@ -4,10 +4,6 @@ import {
   Typography,
   Tooltip,
   Badge,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
   Avatar
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +11,6 @@ import { toast } from 'sonner';
 import {
   Home as HomeIcon,
   Search as SearchIcon,
-  Explore as ExploreIcon,
   Movie as MovieIcon,
   Message as MessageIcon,
   Notifications as NotificationsIcon,
@@ -25,9 +20,7 @@ import {
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from "react-redux";
 import { setAuthUser } from '../../features/auth/authSlice';
-import defaultLogo from "../../assets/images/defaultlogo.png";
 import CreatePostDialog from '../../features/posts/components/CreatePostDialog';
-import { clearNotifications } from '../../features/notifications/notificationSlice';
 import apiClient from '../../services/apiClient';
 
 const SidebarItem = ({ data, Icon, label, onClick, likeNotification, followNotification }) => (
@@ -72,22 +65,13 @@ const Sidebar = () => {
   const { unSeenMessages } = useSelector(store => store.message);
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifAnchorEl, setNotifAnchorEl] = useState(null);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
 
   const handleMoreClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const handleNotifClick = (event) => setNotifAnchorEl(event.currentTarget);
-  const handleNotifClose = () => {
-    setNotifAnchorEl(null)
-    dispatch(clearNotifications())
-  };
-
   const open = Boolean(anchorEl);
-  const notifOpen = Boolean(notifAnchorEl);
   const id = open ? 'more-popover' : undefined;
-  const notifId = notifOpen ? 'notification-popover' : undefined;
 
   const handleLogout = async () => {
     try {
@@ -122,6 +106,7 @@ const Sidebar = () => {
           <div className='flex flex-col gap-y-6 w-full text-sm font-semibold'>
             <SidebarItem Icon={HomeIcon} label='Home' onClick={() => navigate('/')} />
             <SidebarItem Icon={SearchIcon} label='Search' onClick={() => navigate('/search')} />
+            <SidebarItem Icon={MovieIcon} label='Reels' onClick={() => navigate('/reels')} />
 
             <SidebarItem
               Icon={() => (
@@ -138,7 +123,7 @@ const Sidebar = () => {
               label='Notifications'
               likeNotification={likeNotification}
               followNotification={followNotification}
-              onClick={handleNotifClick}
+              onClick={() => navigate('/notifications')}
             />
             <SidebarItem Icon={AddBoxIcon} label='Create' onClick={() => setOpenCreateDialog(true)} />
             <SidebarItem
@@ -178,52 +163,6 @@ const Sidebar = () => {
             >
               Logout
             </Typography>
-          </div>
-        </Popover>
-
-        <Popover
-          id={notifId}
-          open={notifOpen}
-          anchorEl={notifAnchorEl}
-          onClose={handleNotifClose}
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        >
-          <div className='p-4 min-w-[300px] max-w-[400px] bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100'>
-            <Typography variant='h6' className='mb-2 font-semibold'>
-              Notifications
-            </Typography>
-            <Divider />
-            <List dense>
-              {likeNotification.length === 0 && followNotification.length === 0 ? (
-                <ListItem>
-                  <ListItemText primary="No new notifications." />
-                </ListItem>
-              ) : (
-                [...likeNotification, ...followNotification].map((notif, idx) => {
-                  const isLike = notif.type === 'like';
-                  return (
-                    <ListItem key={`${notif.type || 'notif'}-${idx}`} alignItems="flex-start">
-                      <div className="flex items-start gap-3">
-                        <img
-                          src={notif.user?.profilePicture?.link || defaultLogo}
-                          alt="avatar"
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                        <div className="flex flex-col">
-                          <p className="font-semibold text-[12px]">
-                            {notif.userDetails?.userName || 'Unknown User'}
-                            <span className="font-normal ml-1">
-                              {notif.message || (isLike ? 'liked your post' : 'started following you')}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </ListItem>
-                  );
-                })
-              )}
-            </List>
           </div>
         </Popover>
       </div>

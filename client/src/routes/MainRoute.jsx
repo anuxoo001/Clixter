@@ -10,6 +10,8 @@ import UserPosts from '../features/profile/components/UserPosts';
 import UserSaved from '../features/profile/components/UserSaved';
 import Search from '../features/search/pages/Search';
 import UpdateProfile from '../features/profile/pages/UpdateProfile';
+import Reels from '../features/posts/pages/Reels';
+import Notifications from '../features/notifications/pages/Notifications';
 
 
 const MainRoute = () => ([
@@ -20,6 +22,8 @@ const MainRoute = () => ([
         </ProtectedRoute>
       }>
       <Route path="/" element={<Home />} />
+      <Route path="/reels" element={<Reels />} />
+      <Route path="/notifications" element={<Notifications />} />
       <Route path="/search" element={<Search />} />
       <Route path=":id/updateprofile" element={<UpdateProfile />} />
       <Route path=":id/profile" element={<ProfileLayout />}>

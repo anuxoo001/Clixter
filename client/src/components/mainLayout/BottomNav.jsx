@@ -4,6 +4,7 @@ import { Badge, Menu, MenuItem } from '@mui/material';
 import {
   Home as HomeIcon,
   Search as SearchIcon,
+  Movie as MovieIcon,
   Message as MessageIcon,
   AddBox as AddBoxIcon,
   AccountCircle as AccountCircleIcon,
@@ -69,6 +70,10 @@ const BottomNav = () => {
 
           <NavItem active={isActive('/search')} onClick={() => navigate('/search')} label="Search">
             <SearchIcon className="text-[26px]" />
+          </NavItem>
+
+          <NavItem active={isActive('/reels')} onClick={() => navigate('/reels')} label="Reels">
+            <MovieIcon className="text-[26px]" />
           </NavItem>
 
           <NavItem active={false} onClick={() => setOpenCreateDialog(true)} label="Create">

@@ -58,6 +58,8 @@ export default function Stories() {
           media: post.media,
           caption: post.caption,
           createdAt: post.createdAt,
+          reactions: post.reactions || [],
+          likes: post.likes || [],
         };
       }
     });
@@ -293,6 +295,17 @@ export default function Stories() {
                 <p className="text-sm">{activeStory.caption}</p>
               </div>
             )}
+
+            {/* Reactions / likes count */}
+            <div className="absolute bottom-4 right-4 flex items-center gap-3 text-white">
+              <div className="flex items-center gap-1 bg-black/40 backdrop-blur px-3 py-1.5 rounded-full">
+                <span className="text-base">❤️</span>
+                <span className="text-sm font-semibold">
+                  {(activeStory.reactions?.reduce((sum, r) => sum + (r.users?.length || 0), 0) || 0) +
+                    (activeStory.likes?.length || 0)}
+                </span>
+              </div>
+            </div>
 
             {/* Tap zones */}
             <div className="absolute inset-0 flex z-10">
