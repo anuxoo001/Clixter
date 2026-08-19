@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setAuthUser } from "../authSlice";
+import apiClient from "../../../services/apiClient";
 
 export default function AuthForm() {
   const navigate = useNavigate();
@@ -28,7 +29,10 @@ export default function AuthForm() {
 
       if (res.data.success) {
         localStorage.setItem('clixter_token', res.data.token);
-        dispatch(setAuthUser(res.data.auther));
+        const meRes = await apiClient.get('/api/user/me');
+        if (meRes.data.success) {
+          dispatch(setAuthUser(meRes.data.user));
+        }
         toast.success(res.data.message);
         navigate("/", { replace: true });
       }

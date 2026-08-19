@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
 import apiClient from "../services/apiClient";
+import { setAuthUser } from "../features/auth/authSlice";
 
 export default function useAuthCheck() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const verifyUser = async () => {
@@ -13,6 +16,9 @@ export default function useAuthCheck() {
 
         if (res.data.success) {
           setIsAuthenticated(true);
+          if (res.data.user) {
+            dispatch(setAuthUser(res.data.user));
+          }
         } else {
           setIsAuthenticated(false);
         }

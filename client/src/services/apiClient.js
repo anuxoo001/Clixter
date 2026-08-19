@@ -41,6 +41,14 @@ const apiClient = axios.create({
   withCredentials: true,
 })
 
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('clixter_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 if (apiUrl) {
   axios.defaults.baseURL = apiUrl
   axios.defaults.withCredentials = true
