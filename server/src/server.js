@@ -46,10 +46,6 @@ app.use(
     optionsSuccessStatus: 204,
   })
 );
-
-// Some hosts require explicit OPTIONS handling for preflight
-app.options('*', cors());
-
 // Middleware to parse JSON
 app.use(express.json());
 
