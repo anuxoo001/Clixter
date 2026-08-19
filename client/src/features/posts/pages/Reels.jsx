@@ -16,6 +16,7 @@ import { setPosts, setSelectedPost } from "../postSlice";
 import { setAuthUser } from "../../auth/authSlice";
 import apiClient from "../../../services/apiClient";
 import CommentDialog from "../../comments/components/CommentDialog";
+import LikesDialog from "../components/LikesDialog";
 import { isVideoUrl } from "../../../utils/media";
 import Linkify from "../../../components/common/Linkify";
 
@@ -33,12 +34,17 @@ const formatTimeAgo = (timestamp) => {
   return `${diffInDays}d ago`;
 };
 
-const ActionButton = ({ onClick, icon, count, label }) => (
+const ActionButton = ({ onClick, countOnClick, icon, count, label }) => (
   <div className="flex flex-col items-center gap-1">
     <IconButton onClick={onClick} sx={{ color: "white", padding: 0.5 }}>
       {icon}
     </IconButton>
-    <span className="text-xs text-white/90">{count || ""}</span>
+    <button
+      onClick={countOnClick || onClick}
+      className="text-xs text-white/90"
+    >
+      {count || ""}
+    </button>
   </div>
 );
 
@@ -56,6 +62,7 @@ const ReelItem = ({ data, onComment }) => {
   const [bookmarked, setBookmarked] = useState(user?.bookmarks?.includes(data?._id));
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(false);
+  const [likesOpen, setLikesOpen] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -173,6 +180,7 @@ const ReelItem = ({ data, onComment }) => {
       <div className="absolute right-3 bottom-20 flex flex-col items-center gap-4">
         <ActionButton
           onClick={likeHandler}
+          countOnClick={() => setLikesOpen(true)}
           label="Like"
           count={likeCount}
           icon={
@@ -182,6 +190,11 @@ const ReelItem = ({ data, onComment }) => {
               <FavoriteBorderIcon sx={{ fontSize: 30 }} />
             )
           }
+        />
+        <LikesDialog
+          postId={data._id}
+          open={likesOpen}
+          handleClose={() => setLikesOpen(false)}
         />
         <ActionButton
           onClick={() => onComment(data)}

@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import {
   Home as HomeIcon,
   Search as SearchIcon,
+  Explore as ExploreIcon,
   Movie as MovieIcon,
   Message as MessageIcon,
   Notifications as NotificationsIcon,
@@ -106,6 +107,7 @@ const Sidebar = () => {
           <div className='flex flex-col gap-y-6 w-full text-sm font-semibold'>
             <SidebarItem Icon={HomeIcon} label='Home' onClick={() => navigate('/')} />
             <SidebarItem Icon={SearchIcon} label='Search' onClick={() => navigate('/search')} />
+            <SidebarItem Icon={ExploreIcon} label='Explore' onClick={() => navigate('/explore')} />
             <SidebarItem Icon={MovieIcon} label='Reels' onClick={() => navigate('/reels')} />
 
             <SidebarItem

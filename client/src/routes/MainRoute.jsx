@@ -11,7 +11,9 @@ import UserSaved from '../features/profile/components/UserSaved';
 import Search from '../features/search/pages/Search';
 import UpdateProfile from '../features/profile/pages/UpdateProfile';
 import Reels from '../features/posts/pages/Reels';
+import Explore from '../features/posts/pages/Explore';
 import Notifications from '../features/notifications/pages/Notifications';
+import SuggestedAccounts from '../pages/SuggestedAccounts';
 
 
 const MainRoute = () => ([
@@ -23,6 +25,8 @@ const MainRoute = () => ([
       }>
       <Route path="/" element={<Home />} />
       <Route path="/reels" element={<Reels />} />
+      <Route path="/explore" element={<Explore />} />
+      <Route path="/suggestions" element={<SuggestedAccounts />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/search" element={<Search />} />
       <Route path=":id/updateprofile" element={<UpdateProfile />} />

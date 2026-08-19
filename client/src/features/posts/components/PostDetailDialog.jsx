@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import apiClient from "../../../services/apiClient";
 import { isVideoUrl } from "../../../utils/media";
 import Linkify from "../../../components/common/Linkify";
+import LikesDialog from "./LikesDialog";
 
 const reactionEmojis = ["❤️", "😂", "😮", "😢", "👏"];
 
@@ -42,6 +43,7 @@ export default function PostDetailDialog({ post, open, handleClose }) {
   const [bookmarked, setBookmarked] = useState(
     user?.bookmarks?.includes(post?._id)
   );
+  const [likesOpen, setLikesOpen] = useState(false);
 
   useEffect(() => {
     setComments(post?.comments || []);
@@ -338,9 +340,12 @@ export default function PostDetailDialog({ post, open, handleClose }) {
                   <TurnedInNotIcon sx={{ fontSize: 26 }} className="text-slate-900 dark:text-white" />
                 )}
               </IconButton>
-              <span className="text-sm font-semibold text-slate-900 dark:text-white ml-auto">
-                {likes.length} likes
-              </span>
+              <button
+                onClick={() => setLikesOpen(true)}
+                className="text-sm font-semibold text-slate-900 dark:text-white ml-auto hover:underline"
+              >
+                {likes.length} {likes.length === 1 ? "like" : "likes"}
+              </button>
             </div>
 
             <form
@@ -361,6 +366,12 @@ export default function PostDetailDialog({ post, open, handleClose }) {
           </div>
         </div>
       </div>
+
+      <LikesDialog
+        postId={post?._id}
+        open={likesOpen}
+        handleClose={() => setLikesOpen(false)}
+      />
     </Dialog>
   );
 }

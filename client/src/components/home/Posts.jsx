@@ -23,6 +23,7 @@ import { addSuggestionUser, removeSuggestionUser, setAuthUser } from "../../feat
 import apiClient from "../../services/apiClient";
 import { isVideoUrl } from "../../utils/media";
 import Linkify from "../common/Linkify";
+import LikesDialog from "../../features/posts/components/LikesDialog";
 
 export default function Posts({ data }) {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function Posts({ data }) {
   const [postLikeIds, setPostLikeIds] = useState(data?.likes || []);
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [videoMuted, setVideoMuted] = useState(true);
+  const [likesOpen, setLikesOpen] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -83,6 +85,28 @@ export default function Posts({ data }) {
       const res = await apiClient.delete(`/api/post/delete/${data._id}`);
       if (res.data.success) {
         const updatedPosts = posts.filter((postItem) => postItem?._id !== data?._id);
+        dispatch(setPosts(updatedPosts));
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      handleCloseDialog();
+    }
+  };
+
+  const editCaptionHandler = async () => {
+    const newCaption = prompt("Edit caption", data.caption || "");
+    if (newCaption === null) {
+      handleCloseDialog();
+      return;
+    }
+    try {
+      const res = await apiClient.patch(`/api/post/${data._id}`, { caption: newCaption });
+      if (res.data.success) {
+        const updatedPosts = posts.map((post) =>
+          post._id === data._id ? { ...post, caption: newCaption } : post
+        );
         dispatch(setPosts(updatedPosts));
         toast.success(res.data.message);
       }
@@ -238,6 +262,7 @@ export default function Posts({ data }) {
 
   const visibleOptions = [
     { label: "Delete Post", danger: true, showFor: "author", onClick: deletePostHandler },
+    { label: "Edit Caption", danger: false, showFor: "author", onClick: editCaptionHandler },
     // { label: "Report", danger: true, showFor: "user" },
     {
       label: user?.following?.includes(data?.author?._id) ? 'Unfollow' : 'Follow',
@@ -404,7 +429,12 @@ export default function Posts({ data }) {
             : <TurnedInNotIcon onClick={bookmarkHandler} sx={{ fontSize: "30px", cursor: 'pointer' }} className="text-slate-100" />}
         </div>
 
-        <p className="text-sm font-semibold">{postLikes} likes</p>
+        <button
+          onClick={() => setLikesOpen(true)}
+          className="text-sm font-semibold hover:underline"
+        >
+          {postLikes} {postLikes === 1 ? "like" : "likes"}
+        </button>
 
         {data?.caption && (
           <p className="text-sm mt-1">
@@ -488,6 +518,12 @@ export default function Posts({ data }) {
         data={data}
         open={commentDialogOpen}
         handleClose={() => setCommentDialogOpen(false)}
+      />
+
+      <LikesDialog
+        postId={data._id}
+        open={likesOpen}
+        handleClose={() => setLikesOpen(false)}
       />
 
       <Dialog fullWidth maxWidth="xs" open={shareDialogOpen} onClose={() => setShareDialogOpen(false)}>

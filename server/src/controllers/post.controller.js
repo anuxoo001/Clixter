@@ -78,6 +78,46 @@ export const getAllPost = async (req, res) => {
     }
 }
 
+export const getPostLikes = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const post = await Post.findById(postId).populate({ path: 'likes', select: 'userName fullName profilePicture' });
+        if (!post) return res.status(404).json({ success: false, message: 'Post not found!' });
+
+        return res.status(200).json({ success: true, users: post.likes });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+export const editPostCaption = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const authorId = req.id;
+        const { caption } = req.body;
+
+        if (typeof caption !== 'string') {
+            return res.status(400).json({ success: false, message: 'Caption is required!' });
+        }
+
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ success: false, message: 'Post not found!' });
+
+        if (post.author.toString() !== authorId) {
+            return res.status(403).json({ success: false, message: 'You can only edit your own posts!' });
+        }
+
+        post.caption = caption;
+        await post.save();
+
+        await post.populate({ path: 'author', select: 'userName profilePicture' });
+
+        return res.status(200).json({ success: true, message: 'Caption updated.', post });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
 export const getUserPost = async (req , res) =>{
     try {
         const authorId = req.id;

@@ -7,7 +7,6 @@ import apiClient from "../../services/apiClient";
 import { toast } from "sonner";
 
 
-
 export default function SidebarSuggestions() {
   const { user } = useSelector(store => store.auth)
   const navigate = useNavigate()
@@ -58,7 +57,15 @@ export default function SidebarSuggestions() {
   }
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-gray-400 dark:text-slate-300">Suggested for you</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-400 dark:text-slate-300">Suggested for you</h3>
+        <button
+          onClick={() => navigate('/suggestions')}
+          className="text-xs text-sky-400 hover:text-sky-300 font-semibold"
+        >
+          See all
+        </button>
+      </div>
 
 
       {suggestionUsers.length === 0 ? (
