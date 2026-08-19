@@ -51,6 +51,8 @@ const BottomNav = () => {
     try {
       const res = await apiClient.post(`/api/user/logout`, {});
       if (res.data.success) {
+        sessionStorage.removeItem('clixter_token');
+        localStorage.removeItem('clixter_token');
         dispatch(setAuthUser(null));
         toast.success(res.data.message);
         navigate('/auth-login', { replace: true });

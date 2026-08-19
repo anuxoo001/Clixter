@@ -42,7 +42,7 @@ const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('clixter_token');
+  const token = sessionStorage.getItem('clixter_token') || localStorage.getItem('clixter_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

@@ -14,6 +14,7 @@ export default function AuthForm() {
     password: ''
   });
   const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(false);
 
   const onChangeHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -28,7 +29,13 @@ export default function AuthForm() {
       });
 
       if (res.data.success) {
-        localStorage.setItem('clixter_token', res.data.token);
+        if (remember) {
+          localStorage.setItem('clixter_token', res.data.token);
+          sessionStorage.removeItem('clixter_token');
+        } else {
+          sessionStorage.setItem('clixter_token', res.data.token);
+          localStorage.removeItem('clixter_token');
+        }
         const meRes = await apiClient.get('/api/user/me');
         if (meRes.data.success) {
           dispatch(setAuthUser(meRes.data.user));
@@ -95,8 +102,8 @@ export default function AuthForm() {
           <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
             <input
               type="checkbox"
-              checked={true}
-              onChange={() => {}}
+              checked={remember}
+              onChange={() => setRemember((r) => !r)}
               className="h-4 w-4 rounded border-slate-600 bg-slate-50 text-sky-400 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900"
             />
             Remember me
@@ -123,7 +130,7 @@ export default function AuthForm() {
         <p className="font-semibold text-slate-100">Made for professionals</p>
         <ul className="mt-3 space-y-2 text-slate-400">
           <li>• Modern password-based login.</li>
-          <li>• Session stored in localStorage.</li>
+          <li>• Session lasts until the tab is closed (check "Remember me" to stay logged in).</li>
           <li>• Clean interface with premium gradients and motion.</li>
         </ul>
       </div>
